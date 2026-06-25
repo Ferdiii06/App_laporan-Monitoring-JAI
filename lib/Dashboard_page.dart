@@ -60,7 +60,7 @@ class _DashboardPageState extends State<DashboardPage> {
         line: 'Line 01',
         defect: 'Core',
         jumlah: 5,
-        subDefect: 'A.1 Fraying',
+        subDefect: '1.A - FRAYING',
       ),
       const ReportItem(
         date: '23 JUNE 2026',
@@ -68,7 +68,7 @@ class _DashboardPageState extends State<DashboardPage> {
         line: 'Line 01',
         defect: 'Insert Circuit',
         jumlah: 5,
-        subDefect: '1.A Cross Circuit',
+        subDefect: '1.A - CROSS CIRCUIT',
       ),
     ];
   }
