@@ -521,7 +521,7 @@ class _ReportDefectPreAssyPageState extends State<ReportDefectPreAssyPage> {
                 side: const BorderSide(color: borderColor),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('KEMBALI .5INPUT',
+              child: const Text('KEMBALI INPUT',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             ),
           ),

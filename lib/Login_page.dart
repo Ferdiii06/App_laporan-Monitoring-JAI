@@ -36,8 +36,8 @@ class _LoginPageState extends State<LoginPage> {
       _showError('Nama Lengkap tidak boleh kosong.');
       return;
     }
-    if (pin.length < 4) {
-      _showError('PIN harus 4 digit.');
+    if (pin.length < 6) {
+      _showError('PIN harus 6 digit.');
       return;
     }
 
