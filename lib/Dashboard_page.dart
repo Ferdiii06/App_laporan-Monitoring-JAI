@@ -772,7 +772,7 @@ class _ReportCard extends StatelessWidget {
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: Colors.black)),
-                Text('${report.jumlah} Unit',
+                Text('${report.jumlah}',
                     style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,

@@ -50,10 +50,14 @@ class _ReportDefectPreAssyPageState extends State<ReportDefectPreAssyPage> {
   ];
 
   final Map<String, List<String>> _defectMap = const {
-    'Core': ['1.A - FRAYING', '1.B - SCRATCH', '1.C - BROKEN'],
-    'Insert Circuit': ['1.A - CROSS CIRCUIT', '1.B - SHORT CIRCUIT'],
-    'Connector': ['1.A - DAMAGE', '1.B - DEFORM'],
-    'Terminal': ['1.A - BENT', '1.B - MISSING'],
+    'CORE': ['A.1 - FRAYING', 'A.2 - CUT CORE', 'A.3 - TIDAK TERATUR', 'A.4 - MAJU','A.5 - MUNDUR', 'A.6 - TIDAK TERCRIMPING', 'A.7 - SCRATCH'],
+    'TERMINAL': ['B.1 - TERGORES', 'B.2 - BENT UP','B.3 - BENT DOWN', 'B.4 - MELINTIR', 'B.5 - UJUNG TERPOTONG', 'B.6 - OPEN/FLARE', 'B.7 - DEFORM', 'B.8 - BRIDGE TERLALU PANJANG', 'B.9 - CANTILEVER RUSAK', 'B.10 - LEPAS DARI CIRCUIT'],
+    'FRONT CRIMPING': ['C.1 - C/H TERLALU TINGGI', 'C.2 - C/H TERLALU RENDAH','C.3 - C/W TERLALU TINGGI', 'C.4 - C/W TERLALU RENDAH',  'C.5 - FLASH'],
+    'REAR  CRIMPING': ['D.1 - C/H - TERLALU TINGGI', 'D.2 - C/H TERLALU RENDAH', 'D.3 - C/W TERLALU TINGGI', 'D.4 - C/W TERLALU RENDAH', 'D.5 - ADA DI DALAM INSULASI', 'D.6 - TIDAK SEIMBANG'],
+    'INSULATION': ['E.1 - TERCRIMPING', 'E.2 - TERLALU MUNDUR', 'E.3 - DAMAGE', 'E.4 - TIDAK RATA'],
+    'SEAL SUMBER': ['F.1 - TERPOTONG', 'F.2 - TERBALIK', 'F.3 - TERLALU MUNDUR', 'F.4 - TERLALU MAJU', 'F.5 - TERCRIMPING', 'F.6 - MISSING', 'F.7 - SEAL SOBEK'],
+    'CRIMPING': ['G.1 - FOREIGN MATERIAL', 'G.2 - ADB.1 TERMMINAL TERCIMPING', 'G.3 - NO CORE', 'G.4 - NO STRIPPING'],
+    'LAIN-LAIN': ['H.1 - LANCE RUSAK', 'H.2 - STABILIZER RUSAK', 'H.3 - BELLMOUTH TIDAK STANDART', 'H.4 - KONDISI CORE BAG.A', 'H.5 - RESIN MASUK BAG.A', 'H.6 - RESIN BAREL BAG.B TERBUKA', 'H.7 - CORE TERLIHAT ATAS SISI C', 'H.8 - CORE TERLIHAT SAMPING SISI C', 'H.9 - SISI PUNGGUNG', 'H.10 - ABNORMAL RESIN', 'H.11 - PANJANG WELDING N-OK', 'H.12 - CIRCUIT TIDAK TERBONDER', 'H.13 - BONDER RETAK', 'H.14 - STRIPPING KEPANJANGAN'],
   };
 
   // ── State form ──
@@ -323,7 +327,7 @@ class _ReportDefectPreAssyPageState extends State<ReportDefectPreAssyPage> {
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('LANJUT KE KONFIRMASI',
+                  Text('LANJUT .5KONFIRMASI',
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
                   SizedBox(width: 8),
                   Icon(Icons.arrow_forward, size: 18),
@@ -517,7 +521,7 @@ class _ReportDefectPreAssyPageState extends State<ReportDefectPreAssyPage> {
                 side: const BorderSide(color: borderColor),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('KEMBALI KE INPUT',
+              child: const Text('KEMBALI .5INPUT',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             ),
           ),
