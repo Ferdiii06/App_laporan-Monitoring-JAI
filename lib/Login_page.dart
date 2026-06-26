@@ -37,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
     if (pin.length < 6) {
-      _showError('PIN harus 6 digit.');
+      _showError('PIN harus 6 digit');
       return;
     }
 
@@ -185,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 // ── Label PIN ──
                 const Text(
-                  'PIN (4 Digit)',
+                  'PIN (6 Digit)',
                   style: TextStyle(
                     fontSize: 13,
                     color: labelRed,
@@ -199,7 +199,7 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _pinController,
                   obscureText: true,
                   keyboardType: TextInputType.number,
-                  maxLength: 4,
+                  maxLength: 6,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   obscuringCharacter: '•',
                   style: const TextStyle(fontSize: 18, letterSpacing: 6),
