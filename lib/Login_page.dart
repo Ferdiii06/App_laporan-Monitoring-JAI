@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'Dashboard_page.dart'; // ← koneksi ke Dashboard
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'Dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,12 +13,17 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _pinController = TextEditingController();
+  final TextEditingController _pinController  = TextEditingController();
   int _selectedShift = 1;
+  bool _isLoading    = false; // ← tambahan untuk loading state
 
-  static const Color yazakiRed = Color(0xFFB71C1C);
+  static const Color yazakiRed  = Color(0xFFB71C1C);
   static const Color borderColor = Color(0xFFCCCCCC);
-  static const Color labelRed = Color(0xFFCC0000);
+  static const Color labelRed   = Color(0xFFCC0000);
+
+  // ⚠️ Ganti dengan IP laptop kamu (cek via ipconfig di Windows)
+  // Contoh: 'http://192.168.1.10:8000/api'
+  static const String _baseUrl = 'http://192.168.50.220:8000/api';
 
   @override
   void dispose() {
@@ -26,9 +33,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // ─────────────────────────────────────────
-  // FUNGSI LOGIN → pindah ke DashboardPage
+  // FUNGSI LOGIN → hit API Laravel
   // ─────────────────────────────────────────
-  void _login() {
+  Future<void> _login() async {
     final name = _nameController.text.trim();
     final pin  = _pinController.text.trim();
 
@@ -41,16 +48,40 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // ✅ Navigasi ke DashboardPage — kirim nama & shift
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => DashboardPage(
-          userName: name,
-          shift: _selectedShift,
-        ),
-      ),
-    );
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'nama': name, 'pin': pin}),
+      );
+
+      final body = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && body['status'] == true) {
+        final data  = body['data'];
+        final nama  = data['nama']  as String;
+        final shift = data['shift'] as int;
+
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DashboardPage(
+              userName: nama,
+              shift: shift,
+            ),
+          ),
+        );
+      } else {
+        _showError(body['message'] ?? 'Login gagal.');
+      }
+    } catch (e) {
+      _showError('Tidak dapat terhubung ke server.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _showError(String message) {
@@ -127,7 +158,7 @@ class _LoginPageState extends State<LoginPage> {
                     letterSpacing: 1.5,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'Masukkan Nama Anda',
+                    hintText: 'Masukan Nama Lengkap',
                     hintStyle: const TextStyle(
                       fontFamily: 'intern',
                       fontSize: 13,
@@ -204,7 +235,7 @@ class _LoginPageState extends State<LoginPage> {
                   obscuringCharacter: '•',
                   style: const TextStyle(fontSize: 18, letterSpacing: 6),
                   decoration: InputDecoration(
-                    counterText: '',
+                    hintText: '••••••',
                     prefixIcon: const Icon(
                       Icons.lock_outline,
                       color: Colors.grey,
@@ -232,16 +263,26 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 32),
 
                 // ── Tombol Masuk ke Sistem ──
+                // Loading indicator muncul saat proses login, UI tidak berubah
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton.icon(
-                    onPressed: _login,
-                    icon: const Icon(Icons.arrow_forward,
-                        color: Colors.white, size: 20),
-                    label: const Text(
-                      'Masuk ke Sistem',
-                      style: TextStyle(
+                    onPressed: _isLoading ? null : _login,
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.arrow_forward,
+                            color: Colors.white, size: 20),
+                    label: Text(
+                      _isLoading ? 'Memproses...' : 'Masuk ke Sistem',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -270,7 +311,7 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 // ─────────────────────────────────────────
-// WIDGET: Tombol Shift
+// WIDGET: Tombol Shift — tidak berubah
 // ─────────────────────────────────────────
 class _ShiftButton extends StatelessWidget {
   final String label;
@@ -315,7 +356,7 @@ class _ShiftButton extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────
-// PAINTER: Logo Segitiga Yazaki
+// PAINTER: Logo Segitiga Yazaki — tidak berubah
 // ─────────────────────────────────────────
 class _YazakiLogoPainter extends CustomPainter {
   @override

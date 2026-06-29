@@ -74,7 +74,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   // ─────────────────────────────────────────
-  // DIALOG HAPUS — style baru (gambar 1)
+  // DIALOG HAPUS
   // ─────────────────────────────────────────
   void _deleteReport(int index) {
     showDialog(
@@ -89,7 +89,6 @@ class _DashboardPageState extends State<DashboardPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ── Ikon tempat sampah dalam lingkaran merah muda ──
               Container(
                 width: 64,
                 height: 64,
@@ -103,10 +102,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   size: 32,
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // ── Judul ──
               const Text(
                 'Hapus Laporan?',
                 style: TextStyle(
@@ -115,10 +111,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   color: Colors.black,
                 ),
               ),
-
               const SizedBox(height: 10),
-
-              // ── Pesan peringatan warna merah ──
               const Text(
                 'Apakah yakin ingin menghapus data ini?\nTindakan ini tidak dapat dibatalkan.',
                 textAlign: TextAlign.center,
@@ -128,10 +121,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   height: 1.5,
                 ),
               ),
-
               const SizedBox(height: 24),
-
-              // ── Tombol HAPUS (merah penuh, lebar) ──
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -165,10 +155,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 10),
-
-              // ── Tombol BATAL (outline, lebar) ──
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -197,7 +184,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   // ─────────────────────────────────────────
-  // DIALOG LOGOUT — style sama
+  // DIALOG LOGOUT
   // ─────────────────────────────────────────
   void _logout() {
     showDialog(
@@ -329,7 +316,8 @@ class _DashboardPageState extends State<DashboardPage> {
             content: const Text('Laporan berhasil diperbarui.'),
             backgroundColor: yazakiRed,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8)),
           ),
         );
       }
@@ -366,7 +354,8 @@ class _DashboardPageState extends State<DashboardPage> {
             content: const Text('Laporan berhasil diperbarui.'),
             backgroundColor: yazakiRed,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8)),
           ),
         );
       }
@@ -381,7 +370,6 @@ class _DashboardPageState extends State<DashboardPage> {
       'APRIL': 'April', 'MAY': 'Mei', 'JUNE': 'Juni',
       'JULY': 'Juli', 'AUGUST': 'Agustus', 'SEPTEMBER': 'September',
       'OCTOBER': 'Oktober', 'NOVEMBER': 'November', 'DECEMBER': 'Desember',
-      // fallback jika sudah dalam bahasa Indonesia (uppercase)
       'JANUARI': 'Januari', 'FEBRUARI': 'Februari', 'MARET': 'Maret',
       'MEI': 'Mei', 'AGUSTUS': 'Agustus',
       'JULI': 'Juli', 'OKTOBER': 'Oktober',
@@ -395,75 +383,74 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _navigateToInput(String type) async {
-  if (type == 'Pre Assy') {
-    final result = await Navigator.push<DefectReportResult>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ReportDefectPreAssyPage(shift: widget.shift),
-      ),
-    );
-
-    if (result != null) {
-      setState(() {
-        _reports.insert(
-          0,
-          ReportItem(
-            date: result.tanggal.toUpperCase(),
-            type: 'Pre Assy',
-            line: result.line,
-            defect: result.jenisDefect,
-            jumlah: result.jumlah,
-            subDefect: result.subDefect,
-          ),
-        );
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Laporan defect berhasil dikirim.'),
-          backgroundColor: yazakiRed,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    if (type == 'Pre Assy') {
+      final result = await Navigator.push<DefectReportResult>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ReportDefectPreAssyPage(shift: widget.shift),
         ),
       );
-    }
-    return;
-  }
-
-  // Final Assy — navigasi ke ReportDefectFinalAssyPage
-  if (type == 'Final Assy') {
-    final result = await Navigator.push<FinalAssyReportResult>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ReportDefectFinalAssyPage(shift: widget.shift),
-      ),
-    );
-
-    if (result != null) {
-      setState(() {
-        _reports.insert(
-          0,
-          ReportItem(
-            date: result.tanggal.toUpperCase(),
-            type: 'Final Assy',
-            line: result.line,
-            defect: result.jenisDefect,
-            jumlah: result.jumlah,
-            subDefect: result.subDefect,
+      if (result != null) {
+        setState(() {
+          _reports.insert(
+            0,
+            ReportItem(
+              date: result.tanggal.toUpperCase(),
+              type: 'Pre Assy',
+              line: result.line,
+              defect: result.jenisDefect,
+              jumlah: result.jumlah,
+              subDefect: result.subDefect,
+            ),
+          );
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Laporan defect berhasil dikirim.'),
+            backgroundColor: yazakiRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8)),
           ),
         );
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Laporan defect berhasil dikirim.'),
-          backgroundColor: yazakiRed,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      }
+      return;
+    }
+
+    if (type == 'Final Assy') {
+      final result = await Navigator.push<FinalAssyReportResult>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ReportDefectFinalAssyPage(shift: widget.shift),
         ),
       );
+      if (result != null) {
+        setState(() {
+          _reports.insert(
+            0,
+            ReportItem(
+              date: result.tanggal.toUpperCase(),
+              type: 'Final Assy',
+              line: result.line,
+              defect: result.jenisDefect,
+              jumlah: result.jumlah,
+              subDefect: result.subDefect,
+            ),
+          );
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Laporan defect berhasil dikirim.'),
+            backgroundColor: yazakiRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8)),
+          ),
+        );
+      }
+      return;
     }
-    return;
   }
-}
 
   // ─────────────────────────────────────────
   // BUILD
@@ -483,7 +470,8 @@ class _DashboardPageState extends State<DashboardPage> {
             children: [
               // ── App Bar ──
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 14),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -524,7 +512,8 @@ class _DashboardPageState extends State<DashboardPage> {
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFF0F0),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: const Color(0xFFFFCCCC)),
+                          border:
+                              Border.all(color: const Color(0xFFFFCCCC)),
                         ),
                         child: Text(
                           'Shift ${widget.shift} aktif',
@@ -633,7 +622,8 @@ class _InputReportButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        padding:
+            const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
         decoration: BoxDecoration(
           color: yazakiRed,
           borderRadius: BorderRadius.circular(6),
@@ -666,7 +656,7 @@ class _InputReportButton extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────
-// WIDGET: Kartu Report
+// WIDGET: Kartu Report  ← BAGIAN YANG DIPERBAIKI
 // ─────────────────────────────────────────
 class _ReportCard extends StatelessWidget {
   final ReportItem report;
@@ -750,33 +740,46 @@ class _ReportCard extends StatelessWidget {
 
           const Divider(height: 1, color: borderColor),
 
+          // ── Label Defect & Jumlah ──
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
-                Text('Defect',
-                    style: TextStyle(fontSize: 12, color: Colors.grey)),
+                Expanded(
+                  child: Text('Defect',
+                      style: TextStyle(fontSize: 12, color: Colors.grey)),
+                ),
                 Text('Jumlah',
                     style: TextStyle(fontSize: 12, color: Colors.grey)),
               ],
             ),
           ),
+
+          // ── Value Defect & Jumlah ── FIX OVERFLOW
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(report.defect,
+                Expanded(                               // ← fix overflow
+                  child: Text(
+                    report.defect,
                     style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black)),
-                Text('${report.jumlah}',
-                    style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black)),
+                        color: Colors.black),
+                    overflow: TextOverflow.ellipsis,   // ← potong jika panjang
+                    maxLines: 2,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '${report.jumlah}',
+                  style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black),
+                ),
               ],
             ),
           ),
@@ -788,6 +791,8 @@ class _ReportCard extends StatelessWidget {
             child: Text('Sub-Defect',
                 style: TextStyle(fontSize: 12, color: Colors.grey)),
           ),
+
+          // ── Value Sub-Defect ── FIX OVERFLOW
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
             child: Text(
@@ -796,6 +801,8 @@ class _ReportCard extends StatelessWidget {
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: Colors.black),
+              overflow: TextOverflow.ellipsis,         // ← fix overflow
+              maxLines: 2,
             ),
           ),
         ],

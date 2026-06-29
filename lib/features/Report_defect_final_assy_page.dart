@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
+import 'dart:async';
 // ─────────────────────────────────────────
 // MODEL: Hasil Input Report Defect Final Assy
 // ─────────────────────────────────────────
@@ -69,7 +70,7 @@ class _ReportDefectFinalAssyPageState
   String? _selectedSubDefect;
   DateTime _tanggalTemuan = DateTime.now();
   final TextEditingController _qtyController =
-      TextEditingController(text: '0');
+      TextEditingController();
 
   @override
   void dispose() {
@@ -94,26 +95,28 @@ class _ReportDefectFinalAssyPageState
   }
 
   Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _tanggalTemuan,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-      builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(primary: yazakiRed),
+      final picked = await showDatePicker(
+        context: context,
+        initialDate: _tanggalTemuan,
+        firstDate: DateTime.now(),
+        lastDate: DateTime.now(),
+        builder: (ctx, child) => Theme(
+          data: Theme.of(ctx).copyWith(
+            colorScheme: const ColorScheme.light(primary: yazakiRed),
+          ),
+          child: child!,
         ),
-        child: child!,
-      ),
-    );
-    if (picked != null) setState(() => _tanggalTemuan = picked);
-  }
+      );
+      if (picked != null) setState(() => _tanggalTemuan = picked);
+    }
 
-  bool get _isFormValid =>
-      _selectedLine != null &&
+  bool get _isFormValid {
+  final qty = int.tryParse(_qtyController.text) ?? 0;
+  return _selectedLine != null &&
       _selectedDefect != null &&
       _selectedSubDefect != null &&
-      (int.tryParse(_qtyController.text) ?? 0) > 0;
+      qty > 0;
+}
 
   void _goToConfirmation() {
     if (!_isFormValid) {
@@ -298,22 +301,27 @@ class _ReportDefectFinalAssyPageState
           const SizedBox(height: 18),
 
           _buildLabel('JUMLAH (QUANTITY)'),
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFFAFAFA),
-              border: Border.all(color: borderColor),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: TextField(
-              controller: _qtyController,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                border: InputBorder.none,
-              ),
-            ),
-          ),
+  Container(
+    decoration: BoxDecoration(
+      color: const Color(0xFFFAFAFA),
+      border: Border.all(color: borderColor),
+      borderRadius: BorderRadius.circular(6),
+    ),
+    child: TextField(
+      controller: _qtyController,
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(5),
+      ],
+      onChanged: (_) => setState(() {}),
+      style: const TextStyle(fontSize: 14, color: Colors.black87),
+      decoration: const InputDecoration(
+        contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        border: InputBorder.none,
+      ),
+    ),
+  ),
           const SizedBox(height: 32),
 
           SizedBox(
