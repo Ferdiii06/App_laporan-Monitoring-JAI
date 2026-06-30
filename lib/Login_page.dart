@@ -21,9 +21,9 @@ class _LoginPageState extends State<LoginPage> {
   static const Color borderColor = Color(0xFFCCCCCC);
   static const Color labelRed   = Color(0xFFCC0000);
 
-  // ⚠️ Ganti dengan IP laptop kamu (cek via ipconfig di Windows)
+  // ⚠️ Ganti dengan IP laptop jaringan apapun biar bisa diakses sesama IP (cek via ipconfig di Windows)
   // Contoh: 'http://192.168.1.10:8000/api'
-  static const String _baseUrl = 'http://192.168.50.220:8000/api';
+  static const String _baseUrl = 'http://192.168.1.60:8000/api';
 
   @override
   void dispose() {
@@ -37,52 +37,67 @@ class _LoginPageState extends State<LoginPage> {
   // ─────────────────────────────────────────
   Future<void> _login() async {
     final name = _nameController.text.trim();
-    final pin  = _pinController.text.trim();
+    final pin = _pinController.text.trim();
+    final shift = _selectedShift;
 
+    // Validasi
     if (name.isEmpty) {
-      _showError('Nama Lengkap tidak boleh kosong.');
-      return;
+        _showError('Nama Lengkap tidak boleh kosong.');
+        return;
     }
     if (pin.length < 6) {
-      _showError('PIN harus 6 digit');
-      return;
+        _showError('PIN harus 6 digit');
+        return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'nama': name, 'pin': pin}),
-      );
+        final requestBody = {
+            'nama': name,
+            'pin': pin,
+            'shift': shift, // ← KIRIM SHIFT
+        };
 
-      final body = jsonDecode(response.body);
+        print('🔵 Sending to: $_baseUrl/login');
+        print('🔵 Body: $requestBody');
 
-      if (response.statusCode == 200 && body['status'] == true) {
-        final data  = body['data'];
-        final nama  = data['nama']  as String;
-        final shift = data['shift'] as int;
-
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => DashboardPage(
-              userName: nama,
-              shift: shift,
-            ),
-          ),
+        final response = await http.post(
+            Uri.parse('$_baseUrl/login'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(requestBody),
         );
-      } else {
-        _showError(body['message'] ?? 'Login gagal.');
-      }
+
+        final body = jsonDecode(response.body);
+        print('🟢 Response: $body');
+
+        if (response.statusCode == 200 && body['status'] == true) {
+            final data = body['data'];
+            final nama = data['nama'] as String;
+            final shiftData = data['shift'] as int;
+
+            if (!mounted) return;
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => DashboardPage(
+                        userName: nama,
+                        shift: shiftData,
+                    ),
+                ),
+            );
+        } else {
+            // Tampilkan pesan error dari server
+            final message = body['message'] ?? 'Login gagal.';
+            _showError(message);
+        }
     } catch (e) {
-      _showError('Tidak dapat terhubung ke server.');
+        print('🔴 Error: $e');
+        _showError('Tidak dapat terhubung ke server.');
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+        if (mounted) setState(() => _isLoading = false);
     }
-  }
+}
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(

@@ -9,6 +9,8 @@ import 'dart:async';
     final String tanggal;
     final int shift;
     final String line;
+    final String jenisMobil;  // ← TAMBAHKAN
+    final String conveyor;     // ← TAMBAHKAN
     final String jenisDefect;
     final String subDefect;
     final int jumlah;
@@ -17,6 +19,8 @@ import 'dart:async';
       required this.tanggal,
       required this.shift,
       required this.line,
+      required this.jenisMobil,  // ← TAMBAHKAN
+      required this.conveyor,     // ← TAMBAHKAN
       required this.jenisDefect,
       required this.subDefect,
       required this.jumlah,
@@ -50,6 +54,26 @@ import 'dart:async';
       'Line 04',
     ];
 
+    final List<String> _jenisMobilOptions = const [
+    'TOYOTA',
+    'NISSAN',
+    'MAZDA',
+    ];
+
+    final List<String> _conveyorOptions = const [
+    '664W-C5C',
+    '664W-C6C',
+    '664W-C7C',
+    '664W-C8C',
+    '664W-C9C',
+    '664W-C10C',
+    '664W-C11C',
+    '664W-C12C',
+    '664W-C13C',
+    '664W-C14C',
+    ];
+
+
     final Map<String, List<String>> _defectMap = const {
       'CORE': ['A.1 - FRAYING', 'A.2 - CUT CORE', 'A.3 - TIDAK TERATUR', 'A.4 - MAJU','A.5 - MUNDUR', 'A.6 - TIDAK TERCRIMPING', 'A.7 - SCRATCH'],
       'TERMINAL': ['B.1 - TERGORES', 'B.2 - BENT UP','B.3 - BENT DOWN', 'B.4 - MELINTIR', 'B.5 - UJUNG TERPOTONG', 'B.6 - OPEN/FLARE', 'B.7 - DEFORM', 'B.8 - BRIDGE TERLALU PANJANG', 'B.9 - CANTILEVER RUSAK', 'B.10 - LEPAS DARI CIRCUIT'],
@@ -63,6 +87,8 @@ import 'dart:async';
 
     // ── State form ──
     String? _selectedLine;
+    String? _selectedJenisMobil;  // ← TAMBAHKAN
+    String? _selectedConveyor;     // ← TAMBAHKAN
     String? _selectedDefect;
     String? _selectedSubDefect;
     DateTime _tanggalTemuan = DateTime.now();
@@ -124,6 +150,8 @@ void initState() {
     bool get _isFormValid {
   final qty = int.tryParse(_qtyController.text) ?? 0;
   return _selectedLine != null &&
+      _selectedJenisMobil != null &&     // ← TAMBAHKAN
+      _selectedConveyor != null && 
       _selectedDefect != null &&
       _selectedSubDefect != null &&
       qty > 0;
@@ -149,6 +177,8 @@ void initState() {
         tanggal: _formatTanggalPanjang(_tanggalTemuan),
         shift: widget.shift,
         line: _selectedLine!,
+        jenisMobil: _selectedJenisMobil!,    // ← TAMBAHKAN
+        conveyor: _selectedConveyor!,         // ← TAMBAHKAN
         jenisDefect: _selectedDefect!,
         subDefect: _selectedSubDefect!,
         jumlah: int.tryParse(_qtyController.text) ?? 0,
@@ -263,6 +293,26 @@ void initState() {
               onChanged: (v) => setState(() => _selectedLine = v),
             ),
             const SizedBox(height: 18),
+
+            // ── JENIS MOBIL ──
+            _buildLabel('JENIS MOBIL'),
+            _buildDropdown<String>(
+        value: _selectedJenisMobil,
+    hint: 'Pilih Jenis Mobil...',
+    items: _jenisMobilOptions,
+    onChanged: (v) => setState(() => _selectedJenisMobil = v),
+),
+const SizedBox(height: 18),
+
+// ── KONVEYOR ──
+_buildLabel('KONVEYOR'),
+_buildDropdown<String>(
+    value: _selectedConveyor,
+    hint: 'Pilih Konveyor ...',
+    items: _conveyorOptions,
+    onChanged: (v) => setState(() => _selectedConveyor = v),
+),
+const SizedBox(height: 18),
 
             _buildLabel('TANGGAL TEMUAN'),
             GestureDetector(
@@ -476,6 +526,9 @@ void initState() {
                   const Divider(height: 24, color: borderColor),
                   _buildDetailField('LINE / CONVEYOR', _selectedLine ?? '-'),
                   const SizedBox(height: 14),
+                  _buildDetailField('JENIS MOBIL', _selectedJenisMobil ?? '-'), // ← TAMBAHKAN
+                  const SizedBox(height: 14),
+                  _buildDetailField('KONVEYOR', _selectedConveyor ?? '-'),      // ← TAMBAHKAN
                   _buildDetailField('JENIS DEFECT', _selectedDefect ?? '-'),
                   const SizedBox(height: 14),
                   _buildDetailField('JENIS SUB-DEFECT', _selectedSubDefect ?? '-'),

@@ -5,7 +5,6 @@ import 'features/Report_defect_final_assy_page.dart';
 import 'features/edit/Edit_report_defect_final_assy_page.dart';
 import 'features/edit/Edit_report_defect_pre_assy_page.dart';
 
-
 // ─────────────────────────────────────────
 // MODEL: Data Report
 // ─────────────────────────────────────────
@@ -13,6 +12,8 @@ class ReportItem {
   final String date;
   final String type;
   final String line;
+  final String jenisMobil;
+  final String conveyor;
   final String defect;
   final int jumlah;
   final String subDefect;
@@ -21,6 +22,8 @@ class ReportItem {
     required this.date,
     required this.type,
     required this.line,
+    required this.jenisMobil,
+    required this.conveyor,
     required this.defect,
     required this.jumlah,
     required this.subDefect,
@@ -45,7 +48,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  static const Color yazakiRed   = Color(0xFFB71C1C);
+  static const Color yazakiRed = Color(0xFFB71C1C);
   static const Color borderColor = Color(0xFFDDDDDD);
 
   late List<ReportItem> _reports;
@@ -58,14 +61,18 @@ class _DashboardPageState extends State<DashboardPage> {
         date: '23 JUNE 2026',
         type: 'Pre Assy',
         line: 'Line 01',
+        jenisMobil: 'TOYOTA',
+        conveyor: '664W-C5C',
         defect: 'Core',
         jumlah: 5,
-        subDefect: '1.A - FRAYING',
+        subDefect: 'A.1 FRAYING',
       ),
       const ReportItem(
         date: '23 JUNE 2026',
         type: 'Final Assy',
         line: 'Line 01',
+        jenisMobil: 'HONDA',
+        conveyor: '664W-C6C',
         defect: 'Insert Circuit',
         jumlah: 5,
         subDefect: '1.A - CROSS CIRCUIT',
@@ -293,6 +300,8 @@ class _DashboardPageState extends State<DashboardPage> {
           builder: (_) => EditReportDefectPreAssyPage(
             initialLine: report.line,
             initialTanggal: tanggalForEdit,
+            initialJenisMobil: report.jenisMobil,
+            initialConveyor: report.conveyor,
             initialJenisDefect: report.defect,
             initialSubDefect: report.subDefect,
             initialJumlah: report.jumlah,
@@ -306,6 +315,8 @@ class _DashboardPageState extends State<DashboardPage> {
             date: result.tanggal.toUpperCase(),
             type: 'Pre Assy',
             line: result.line,
+            jenisMobil: result.jenisMobil,
+            conveyor: result.conveyor,
             defect: result.jenisDefect,
             jumlah: result.jumlah,
             subDefect: result.subDefect,
@@ -331,6 +342,8 @@ class _DashboardPageState extends State<DashboardPage> {
           builder: (_) => EditReportDefectFinalAssyPage(
             initialLine: report.line,
             initialTanggal: tanggalForEdit,
+            initialJenisMobil: report.jenisMobil,
+            initialConveyor: report.conveyor,
             initialJenisDefect: report.defect,
             initialSubDefect: report.subDefect,
             initialJumlah: report.jumlah,
@@ -344,6 +357,8 @@ class _DashboardPageState extends State<DashboardPage> {
             date: result.tanggal.toUpperCase(),
             type: 'Final Assy',
             line: result.line,
+            jenisMobil: result.jenisMobil,
+            conveyor: result.conveyor,
             defect: result.jenisDefect,
             jumlah: result.jumlah,
             subDefect: result.subDefect,
@@ -366,13 +381,25 @@ class _DashboardPageState extends State<DashboardPage> {
   // Helper: konversi label tanggal "25 JUNE 2026" → "25 Juni 2026"
   String _parseDateLabel(String dateLabel) {
     const englishToIndonesian = {
-      'JANUARY': 'Januari', 'FEBRUARY': 'Februari', 'MARCH': 'Maret',
-      'APRIL': 'April', 'MAY': 'Mei', 'JUNE': 'Juni',
-      'JULY': 'Juli', 'AUGUST': 'Agustus', 'SEPTEMBER': 'September',
-      'OCTOBER': 'Oktober', 'NOVEMBER': 'November', 'DECEMBER': 'Desember',
-      'JANUARI': 'Januari', 'FEBRUARI': 'Februari', 'MARET': 'Maret',
-      'MEI': 'Mei', 'AGUSTUS': 'Agustus',
-      'JULI': 'Juli', 'OKTOBER': 'Oktober',
+      'JANUARY': 'Januari',
+      'FEBRUARY': 'Februari',
+      'MARCH': 'Maret',
+      'APRIL': 'April',
+      'MAY': 'Mei',
+      'JUNE': 'Juni',
+      'JULY': 'Juli',
+      'AUGUST': 'Agustus',
+      'SEPTEMBER': 'September',
+      'OCTOBER': 'Oktober',
+      'NOVEMBER': 'November',
+      'DECEMBER': 'Desember',
+      'JANUARI': 'Januari',
+      'FEBRUARI': 'Februari',
+      'MARET': 'Maret',
+      'MEI': 'Mei',
+      'AGUSTUS': 'Agustus',
+      'JULI': 'Juli',
+      'OKTOBER': 'Oktober',
     };
     final parts = dateLabel.trim().split(' ');
     if (parts.length < 3) return dateLabel;
@@ -398,6 +425,8 @@ class _DashboardPageState extends State<DashboardPage> {
               date: result.tanggal.toUpperCase(),
               type: 'Pre Assy',
               line: result.line,
+              jenisMobil: result.jenisMobil,
+              conveyor: result.conveyor,
               defect: result.jenisDefect,
               jumlah: result.jumlah,
               subDefect: result.subDefect,
@@ -432,6 +461,8 @@ class _DashboardPageState extends State<DashboardPage> {
               date: result.tanggal.toUpperCase(),
               type: 'Final Assy',
               line: result.line,
+              jenisMobil: result.jenisMobil,
+              conveyor: result.conveyor,
               defect: result.jenisDefect,
               jumlah: result.jumlah,
               subDefect: result.subDefect,
@@ -656,14 +687,14 @@ class _InputReportButton extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────
-// WIDGET: Kartu Report  ← BAGIAN YANG DIPERBAIKI
+// WIDGET: Kartu Report (LENGKAP dengan Jenis Mobil & Conveyor)
 // ─────────────────────────────────────────
 class _ReportCard extends StatelessWidget {
   final ReportItem report;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
-  static const Color yazakiRed   = Color(0xFFB71C1C);
+  static const Color yazakiRed = Color(0xFFB71C1C);
   static const Color borderColor = Color(0xFFDDDDDD);
 
   const _ReportCard({
@@ -727,14 +758,66 @@ class _ReportCard extends StatelessWidget {
             ),
           ),
 
+          // ── TYPE ──
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 4, 14, 10),
             child: Text(
               report.type,
               style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black),
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+          ),
+
+          const Divider(height: 1, color: borderColor),
+
+          // ── JENIS MOBIL ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 4),
+            child: Row(
+              children: const [
+                Text(
+                  'Jenis Mobil',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+            child: Text(
+              report.jenisMobil,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+          ),
+
+          // ── CONVEYOR ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 4, 14, 4),
+            child: Row(
+              children: const [
+                Text(
+                  'Conveyor',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+            child: Text(
+              report.conveyor,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
             ),
           ),
 
@@ -746,39 +829,45 @@ class _ReportCard extends StatelessWidget {
             child: Row(
               children: const [
                 Expanded(
-                  child: Text('Defect',
-                      style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  child: Text(
+                    'Defect',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                 ),
-                Text('Jumlah',
-                    style: TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(
+                  'Jumlah',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
               ],
             ),
           ),
 
-          // ── Value Defect & Jumlah ── FIX OVERFLOW
+          // ── Value Defect & Jumlah ──
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(                               // ← fix overflow
+                Expanded(
                   child: Text(
                     report.defect,
                     style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black),
-                    overflow: TextOverflow.ellipsis,   // ← potong jika panjang
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                     maxLines: 2,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  '${report.jumlah}',
+                  '${report.jumlah} Unit',
                   style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                  ),
                 ),
               ],
             ),
@@ -786,22 +875,24 @@ class _ReportCard extends StatelessWidget {
 
           const Divider(height: 1, color: borderColor),
 
+          // ── Sub-Defect ──
           const Padding(
             padding: EdgeInsets.fromLTRB(14, 10, 14, 4),
-            child: Text('Sub-Defect',
-                style: TextStyle(fontSize: 12, color: Colors.grey)),
+            child: Text(
+              'Sub-Defect',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ),
-
-          // ── Value Sub-Defect ── FIX OVERFLOW
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
             child: Text(
               report.subDefect,
               style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black),
-              overflow: TextOverflow.ellipsis,         // ← fix overflow
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+              overflow: TextOverflow.ellipsis,
               maxLines: 2,
             ),
           ),
