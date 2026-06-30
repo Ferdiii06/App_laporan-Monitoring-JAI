@@ -298,7 +298,6 @@ class _DashboardPageState extends State<DashboardPage> {
         context,
         MaterialPageRoute(
           builder: (_) => EditReportDefectPreAssyPage(
-            initialLine: report.line,
             initialTanggal: tanggalForEdit,
             initialJenisMobil: report.jenisMobil,
             initialConveyor: report.conveyor,
@@ -340,7 +339,6 @@ class _DashboardPageState extends State<DashboardPage> {
         context,
         MaterialPageRoute(
           builder: (_) => EditReportDefectFinalAssyPage(
-            initialLine: report.line,
             initialTanggal: tanggalForEdit,
             initialJenisMobil: report.jenisMobil,
             initialConveyor: report.conveyor,

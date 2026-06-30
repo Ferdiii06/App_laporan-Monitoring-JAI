@@ -46,33 +46,32 @@ import 'dart:async';
 
     int _step = 0; // 0 = Informasi Dasar, 1 = Konfirmasi
 
-    // ── Data master (silakan disesuaikan dengan data real) ──
-    final List<String> _lineOptions = const [
-      'Line 01',
-      'Line 02',
-      'Line 03',
-      'Line 04',
-    ];
-
-    final List<String> _jenisMobilOptions = const [
-    'TOYOTA',
-    'NISSAN',
-    'MAZDA',
-    ];
-
-    final List<String> _conveyorOptions = const [
-    '664W-C5C',
-    '664W-C6C',
-    '664W-C7C',
-    '664W-C8C',
-    '664W-C9C',
-    '664W-C10C',
-    '664W-C11C',
-    '664W-C12C',
-    '664W-C13C',
-    '664W-C14C',
-    ];
-
+    // ── Data master ──
+    final Map<String, List<String>> _conveyorMap = const {
+      'TOYOTA': [
+        '664W-C5', '664W-C5C', '664W-C5A', '664W-C5B', '664W-C5D',
+        '711W TNGA-C5', '711W TNGA-C5A', '737W TNGA-C5A', '737W TNGA-C5',
+        '738W-C5C', '858W-C5C', '810W-C5', '941W-C5', '023J-C5', '072Y-C5',
+        '718W-AB5.HEV', '718W-C4.CONV', '718W-C4.TNGA', '891W/892W-C1.GAS LHD',
+        '853W-AT2.HEV LHD', '853W-AT6.GAS LHD', '853W-AT16.GAS LHD',
+        '852W-AT19.HEV PHV LHD', '852W-AT2.HEV PHV LHD', '852W-AT19.HEV PHV RHD',
+        '852W-AT6.GAS LHD', '909W-AT7.GAS LHD', '909W-AT11.HEV LHD',
+        '909W-AT9.GAS LHD', '910W-AT7.GAS LHD', '910W-AT11.HEV LHD',
+        '910W-AT9.GAS LHD', '953W-C6.HEV RHD', '953W-C6.HEV LHD',
+        '953W ENG NO.3-C9', '898W-AB5.HEV', '898W-C4.CONV', '898W-C4.TNGA'
+      ],
+      'NISSAN': [
+        'P33A-B1.BAT', 'P33A-B1.CELL', 'J32V-B2.LHD', 'J32V-B2.RHD',
+        'J42U-B3.EGI', 'J42U-B3.ENGINE', 'J42U-B2.DOOR RH', 'J42U-B2.DOOR LH',
+        'P33C-B1.BAT', 'P33C-B1.CELL'
+      ],
+      'MAZDA': [
+        'J72A-12B.LHD', 'J72A-AB9.RHD', 'J72A-16C.LHD', 'J72K-16C.LHD',
+        'J30A-AB6.EXTEND LHD', 'J30A-AB1.INPANEL LHD', 'J30A-AB6.EXTEND RHD', 'J30A-AB1.INPANEL RHD',
+        'J69P-AB8.EXTEND LHD', 'J69P-AB8.INPANEL LHD', 'J69P-AB8.EXTEND RHD', 'J69P-AB8.INPANEL RHD',
+        'J69P-AB9.EXTEND LHD', 'J69P-AB3.INPANEL LHD'
+      ]
+    };
 
     final Map<String, List<String>> _defectMap = const {
       'CORE': ['A.1 - FRAYING', 'A.2 - CUT CORE', 'A.3 - TIDAK TERATUR', 'A.4 - MAJU','A.5 - MUNDUR', 'A.6 - TIDAK TERCRIMPING', 'A.7 - SCRATCH'],
@@ -85,10 +84,14 @@ import 'dart:async';
       'LAIN-LAIN': ['H.1 - LANCE RUSAK', 'H.2 - STABILIZER RUSAK', 'H.3 - BELLMOUTH TIDAK STANDART', 'H.4 - KONDISI CORE BAG.A', 'H.5 - RESIN MASUK BAG.A', 'H.6 - RESIN BAREL BAG.B TERBUKA', 'H.7 - CORE TERLIHAT ATAS SISI C', 'H.8 - CORE TERLIHAT SAMPING SISI C', 'H.9 - SISI PUNGGUNG', 'H.10 - ABNORMAL RESIN', 'H.11 - PANJANG WELDING N-OK', 'H.12 - CIRCUIT TIDAK TERBONDER', 'H.13 - BONDER RETAK', 'H.14 - STRIPPING KEPANJANGAN'],
     };
 
+    List<String> get _jenisMobilOptions => _conveyorMap.keys.toList();
+
+    List<String> get _conveyorOptions =>
+        _selectedJenisMobil == null ? [] : (_conveyorMap[_selectedJenisMobil] ?? []);
+
     // ── State form ──
-    String? _selectedLine;
-    String? _selectedJenisMobil;  // ← TAMBAHKAN
-    String? _selectedConveyor;     // ← TAMBAHKAN
+    String? _selectedJenisMobil;
+    String? _selectedConveyor;
     String? _selectedDefect;
     String? _selectedSubDefect;
     DateTime _tanggalTemuan = DateTime.now();
@@ -148,14 +151,13 @@ void initState() {
     }
 
     bool get _isFormValid {
-  final qty = int.tryParse(_qtyController.text) ?? 0;
-  return _selectedLine != null &&
-      _selectedJenisMobil != null &&     // ← TAMBAHKAN
-      _selectedConveyor != null && 
-      _selectedDefect != null &&
-      _selectedSubDefect != null &&
-      qty > 0;
-}
+      final qty = int.tryParse(_qtyController.text) ?? 0;
+      return _selectedJenisMobil != null &&
+          _selectedConveyor != null &&
+          _selectedDefect != null &&
+          _selectedSubDefect != null &&
+          qty > 0;
+    }
 
     void _goToConfirmation() {
       if (!_isFormValid) {
@@ -176,9 +178,9 @@ void initState() {
       final result = DefectReportResult(
         tanggal: _formatTanggalPanjang(_tanggalTemuan),
         shift: widget.shift,
-        line: _selectedLine!,
-        jenisMobil: _selectedJenisMobil!,    // ← TAMBAHKAN
-        conveyor: _selectedConveyor!,         // ← TAMBAHKAN
+        line: _selectedConveyor!,
+        jenisMobil: _selectedJenisMobil!,
+        conveyor: _selectedConveyor!,
         jenisDefect: _selectedDefect!,
         subDefect: _selectedSubDefect!,
         jumlah: int.tryParse(_qtyController.text) ?? 0,
@@ -285,34 +287,30 @@ void initState() {
             ),
             const SizedBox(height: 24),
 
-            _buildLabel('LINE / CONVEYOR'),
-            _buildDropdown<String>(
-              value: _selectedLine,
-              hint: 'Pilih Area...',
-              items: _lineOptions,
-              onChanged: (v) => setState(() => _selectedLine = v),
-            ),
-            const SizedBox(height: 18),
-
             // ── JENIS MOBIL ──
             _buildLabel('JENIS MOBIL'),
             _buildDropdown<String>(
-        value: _selectedJenisMobil,
-    hint: 'Pilih Jenis Mobil...',
-    items: _jenisMobilOptions,
-    onChanged: (v) => setState(() => _selectedJenisMobil = v),
-),
-const SizedBox(height: 18),
+              value: _selectedJenisMobil,
+              hint: 'Pilih Jenis Mobil...',
+              items: _jenisMobilOptions,
+              onChanged: (v) => setState(() {
+                _selectedJenisMobil = v;
+                _selectedConveyor = null;
+              }),
+            ),
+            const SizedBox(height: 18),
 
-// ── KONVEYOR ──
-_buildLabel('KONVEYOR'),
-_buildDropdown<String>(
-    value: _selectedConveyor,
-    hint: 'Pilih Konveyor ...',
-    items: _conveyorOptions,
-    onChanged: (v) => setState(() => _selectedConveyor = v),
-),
-const SizedBox(height: 18),
+            // ── KONVEYOR ──
+            if (_selectedJenisMobil != null) ...[
+              _buildLabel('KONVEYOR'),
+              _buildDropdown<String>(
+                value: _selectedConveyor,
+                hint: 'Pilih Konveyor...',
+                items: _conveyorOptions,
+                onChanged: (v) => setState(() => _selectedConveyor = v),
+              ),
+              const SizedBox(height: 18),
+            ],
 
             _buildLabel('TANGGAL TEMUAN'),
             GestureDetector(
@@ -524,11 +522,10 @@ const SizedBox(height: 18),
                     ],
                   ),
                   const Divider(height: 24, color: borderColor),
-                  _buildDetailField('LINE / CONVEYOR', _selectedLine ?? '-'),
+                  _buildDetailField('JENIS MOBIL', _selectedJenisMobil ?? '-'),
                   const SizedBox(height: 14),
-                  _buildDetailField('JENIS MOBIL', _selectedJenisMobil ?? '-'), // ← TAMBAHKAN
+                  _buildDetailField('KONVEYOR', _selectedConveyor ?? '-'),
                   const SizedBox(height: 14),
-                  _buildDetailField('KONVEYOR', _selectedConveyor ?? '-'),      // ← TAMBAHKAN
                   _buildDetailField('JENIS DEFECT', _selectedDefect ?? '-'),
                   const SizedBox(height: 14),
                   _buildDetailField('JENIS SUB-DEFECT', _selectedSubDefect ?? '-'),

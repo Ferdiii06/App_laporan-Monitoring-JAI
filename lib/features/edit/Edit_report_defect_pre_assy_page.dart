@@ -5,7 +5,8 @@ import '../Report_defect_pre_assy_page.dart';
 // PAGE: Edit Report Defect Pre Assy
 // ─────────────────────────────────────────
 class EditReportDefectPreAssyPage extends StatefulWidget {
-  final String initialLine;
+  final String initialJenisMobil;
+  final String initialConveyor;
   final String initialTanggal; // format: "dd Bulan yyyy" misal "25 Juni 2026"
   final String initialJenisDefect;
   final String initialSubDefect;
@@ -14,7 +15,8 @@ class EditReportDefectPreAssyPage extends StatefulWidget {
 
   const EditReportDefectPreAssyPage({
     super.key,
-    required this.initialLine,
+    required this.initialJenisMobil,
+    required this.initialConveyor,
     required this.initialTanggal,
     required this.initialJenisDefect,
     required this.initialSubDefect,
@@ -33,22 +35,51 @@ class _EditReportDefectPreAssyPageState
   static const Color borderColor = Color(0xFFDDDDDD);
 
   // ── Data master ──
-  final List<String> _lineOptions = const [
-    'Line 01',
-    'Line 02',
-    'Line 03',
-    'Line 04',
-  ];
-
-  final Map<String, List<String>> _defectMap = const {
-    'Core': ['1.A - FRAYING', '1.B - SCRATCH', '1.C - BROKEN'],
-    'Insert Circuit': ['1.A - CROSS CIRCUIT', '1.B - SHORT CIRCUIT'],
-    'Connector': ['1.A - DAMAGE', '1.B - DEFORM'],
-    'Terminal': ['1.A - BENT', '1.B - MISSING'],
+  final Map<String, List<String>> _conveyorMap = const {
+    'TOYOTA': [
+      '664W-C5', '664W-C5C', '664W-C5A', '664W-C5B', '664W-C5D',
+      '711W TNGA-C5', '711W TNGA-C5A', '737W TNGA-C5A', '737W TNGA-C5',
+      '738W-C5C', '858W-C5C', '810W-C5', '941W-C5', '023J-C5', '072Y-C5',
+      '718W-AB5.HEV', '718W-C4.CONV', '718W-C4.TNGA', '891W/892W-C1.GAS LHD',
+      '853W-AT2.HEV LHD', '853W-AT6.GAS LHD', '853W-AT16.GAS LHD',
+      '852W-AT19.HEV PHV LHD', '852W-AT2.HEV PHV LHD', '852W-AT19.HEV PHV RHD',
+      '852W-AT6.GAS LHD', '909W-AT7.GAS LHD', '909W-AT11.HEV LHD',
+      '909W-AT9.GAS LHD', '910W-AT7.GAS LHD', '910W-AT11.HEV LHD',
+      '910W-AT9.GAS LHD', '953W-C6.HEV RHD', '953W-C6.HEV LHD',
+      '953W ENG NO.3-C9', '898W-AB5.HEV', '898W-C4.CONV', '898W-C4.TNGA'
+    ],
+    'NISSAN': [
+      'P33A-B1.BAT', 'P33A-B1.CELL', 'J32V-B2.LHD', 'J32V-B2.RHD',
+      'J42U-B3.EGI', 'J42U-B3.ENGINE', 'J42U-B2.DOOR RH', 'J42U-B2.DOOR LH',
+      'P33C-B1.BAT', 'P33C-B1.CELL'
+    ],
+    'MAZDA': [
+      'J72A-12B.LHD', 'J72A-AB9.RHD', 'J72A-16C.LHD', 'J72K-16C.LHD',
+      'J30A-AB6.EXTEND LHD', 'J30A-AB1.INPANEL LHD', 'J30A-AB6.EXTEND RHD', 'J30A-AB1.INPANEL RHD',
+      'J69P-AB8.EXTEND LHD', 'J69P-AB8.INPANEL LHD', 'J69P-AB8.EXTEND RHD', 'J69P-AB8.INPANEL RHD',
+      'J69P-AB9.EXTEND LHD', 'J69P-AB3.INPANEL LHD'
+    ]
   };
 
+  final Map<String, List<String>> _defectMap = const {
+    'CORE': ['A.1 - FRAYING', 'A.2 - CUT CORE', 'A.3 - TIDAK TERATUR', 'A.4 - MAJU','A.5 - MUNDUR', 'A.6 - TIDAK TERCRIMPING', 'A.7 - SCRATCH'],
+    'TERMINAL': ['B.1 - TERGORES', 'B.2 - BENT UP','B.3 - BENT DOWN', 'B.4 - MELINTIR', 'B.5 - UJUNG TERPOTONG', 'B.6 - OPEN/FLARE', 'B.7 - DEFORM', 'B.8 - BRIDGE TERLALU PANJANG', 'B.9 - CANTILEVER RUSAK', 'B.10 - LEPAS DARI CIRCUIT'],
+    'FRONT CRIMPING': ['C.1 - C/H TERLALU TINGGI', 'C.2 - C/H TERLALU RENDAH','C.3 - C/W TERLALU TINGGI', 'C.4 - C/W TERLALU RENDAH',  'C.5 - FLASH'],
+    'REAR  CRIMPING': ['D.1 - C/H - TERLALU TINGGI', 'D.2 - C/H TERLALU RENDAH', 'D.3 - C/W TERLALU TINGGI', 'D.4 - C/W TERLALU RENDAH', 'D.5 - ADA DI DALAM INSULASI', 'D.6 - TIDAK SEIMBANG'],
+    'INSULATION': ['E.1 - TERCRIMPING', 'E.2 - TERLALU MUNDUR', 'E.3 - DAMAGE', 'E.4 - TIDAK RATA'],
+    'SEAL SUMBER': ['F.1 - TERPOTONG', 'F.2 - TERBALIK', 'F.3 - TERLALU MUNDUR', 'F.4 - TERLALU MAJU', 'F.5 - TERCRIMPING', 'F.6 - MISSING', 'F.7 - SEAL SOBEK'],
+    'CRIMPING': ['G.1 - FOREIGN MATERIAL', 'G.2 - ADB.1 TERMMINAL TERCIMPING', 'G.3 - NO CORE', 'G.4 - NO STRIPPING'],
+    'LAIN-LAIN': ['H.1 - LANCE RUSAK', 'H.2 - STABILIZER RUSAK', 'H.3 - BELLMOUTH TIDAK STANDART', 'H.4 - KONDISI CORE BAG.A', 'H.5 - RESIN MASUK BAG.A', 'H.6 - RESIN BAREL BAG.B TERBUKA', 'H.7 - CORE TERLIHAT ATAS SISI C', 'H.8 - CORE TERLIHAT SAMPING SISI C', 'H.9 - SISI PUNGGUNG', 'H.10 - ABNORMAL RESIN', 'H.11 - PANJANG WELDING N-OK', 'H.12 - CIRCUIT TIDAK TERBONDER', 'H.13 - BONDER RETAK', 'H.14 - STRIPPING KEPANJANGAN'],
+  };
+
+  List<String> get _jenisMobilOptions => _conveyorMap.keys.toList();
+
+  List<String> get _conveyorOptions =>
+      _selectedJenisMobil == null ? [] : (_conveyorMap[_selectedJenisMobil] ?? []);
+
   // ── State form ──
-  late String? _selectedLine;
+  late String? _selectedJenisMobil;
+  late String? _selectedConveyor;
   late String? _selectedDefect;
   late String? _selectedSubDefect;
   late DateTime _tanggalTemuan;
@@ -59,8 +90,13 @@ class _EditReportDefectPreAssyPageState
     super.initState();
 
     // Pre-fill dengan data yang sudah ada
-    _selectedLine = _lineOptions.contains(widget.initialLine)
-        ? widget.initialLine
+    _selectedJenisMobil = _jenisMobilOptions.contains(widget.initialJenisMobil)
+        ? widget.initialJenisMobil
+        : null;
+    _selectedConveyor = _selectedJenisMobil != null &&
+            (_conveyorMap[_selectedJenisMobil]?.contains(widget.initialConveyor) ??
+                false)
+        ? widget.initialConveyor
         : null;
     _selectedDefect = _defectMap.containsKey(widget.initialJenisDefect)
         ? widget.initialJenisDefect
@@ -132,7 +168,8 @@ class _EditReportDefectPreAssyPageState
       _selectedDefect == null ? [] : (_defectMap[_selectedDefect] ?? []);
 
   bool get _isFormValid =>
-      _selectedLine != null &&
+      _selectedJenisMobil != null &&
+      _selectedConveyor != null &&
       _selectedDefect != null &&
       _selectedSubDefect != null &&
       (int.tryParse(_qtyController.text) ?? 0) > 0;
@@ -153,7 +190,9 @@ class _EditReportDefectPreAssyPageState
     final result = DefectReportResult(
       tanggal: _formatTanggalPanjang(_tanggalTemuan),
       shift: widget.shift,
-      line: _selectedLine!,
+      line: _selectedConveyor!,
+      jenisMobil: _selectedJenisMobil!,
+      conveyor: _selectedConveyor!,
       jenisDefect: _selectedDefect!,
       subDefect: _selectedSubDefect!,
       jumlah: int.tryParse(_qtyController.text) ?? 0,
@@ -231,15 +270,30 @@ class _EditReportDefectPreAssyPageState
           ),
           const SizedBox(height: 20),
 
-          // ── LINE / CONVEYOR ──
-          _buildLabel('LINE / CONVEYOR'),
+          // ── JENIS MOBIL ──
+          _buildLabel('JENIS MOBIL'),
           _buildDropdown<String>(
-            value: _selectedLine,
-            hint: 'Pilih Area...',
-            items: _lineOptions,
-            onChanged: (v) => setState(() => _selectedLine = v),
+            value: _selectedJenisMobil,
+            hint: 'Pilih Jenis Mobil...',
+            items: _jenisMobilOptions,
+            onChanged: (v) => setState(() {
+              _selectedJenisMobil = v;
+              _selectedConveyor = null;
+            }),
           ),
           const SizedBox(height: 18),
+
+          // ── KONVEYOR ──
+          if (_selectedJenisMobil != null) ...[
+            _buildLabel('KONVEYOR'),
+            _buildDropdown<String>(
+              value: _selectedConveyor,
+              hint: 'Pilih Konveyor...',
+              items: _conveyorOptions,
+              onChanged: (v) => setState(() => _selectedConveyor = v),
+            ),
+            const SizedBox(height: 18),
+          ],
 
           // ── TANGGAL TEMUAN ──
           _buildLabel('TANGGAL TEMUAN'),
