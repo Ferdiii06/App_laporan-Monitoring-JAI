@@ -51,33 +51,19 @@ class _DashboardPageState extends State<DashboardPage> {
   static const Color yazakiRed = Color(0xFFB71C1C);
   static const Color borderColor = Color(0xFFDDDDDD);
 
+  // ── Static Map untuk menampung riwayat defect per user ──
+  static final Map<String, List<ReportItem>> _userReports = {};
+
   late List<ReportItem> _reports;
 
   @override
   void initState() {
     super.initState();
-    _reports = [
-      const ReportItem(
-        date: '23 JUNE 2026',
-        type: 'Pre Assy',
-        line: 'Line 01',
-        jenisMobil: 'TOYOTA',
-        conveyor: '664W-C5C',
-        defect: 'Core',
-        jumlah: 5,
-        subDefect: 'A.1 FRAYING',
-      ),
-      const ReportItem(
-        date: '23 JUNE 2026',
-        type: 'Final Assy',
-        line: 'Line 01',
-        jenisMobil: 'HONDA',
-        conveyor: '664W-C6C',
-        defect: 'Insert Circuit',
-        jumlah: 5,
-        subDefect: '1.A - CROSS CIRCUIT',
-      ),
-    ];
+    if (!_userReports.containsKey(widget.userName)) {
+      _reports = [];
+    } else {
+      _reports = _userReports[widget.userName]!;
+    }
   }
 
   // ─────────────────────────────────────────
@@ -134,7 +120,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    setState(() => _reports.removeAt(index));
+                    setState(() {
+                      _reports.removeAt(index);
+                      _userReports[widget.userName] = _reports;
+                    });
                     Navigator.pop(ctx);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -320,6 +309,7 @@ class _DashboardPageState extends State<DashboardPage> {
             jumlah: result.jumlah,
             subDefect: result.subDefect,
           );
+          _userReports[widget.userName] = _reports;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -361,6 +351,7 @@ class _DashboardPageState extends State<DashboardPage> {
             jumlah: result.jumlah,
             subDefect: result.subDefect,
           );
+          _userReports[widget.userName] = _reports;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -430,6 +421,7 @@ class _DashboardPageState extends State<DashboardPage> {
               subDefect: result.subDefect,
             ),
           );
+          _userReports[widget.userName] = _reports;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -466,6 +458,7 @@ class _DashboardPageState extends State<DashboardPage> {
               subDefect: result.subDefect,
             ),
           );
+          _userReports[widget.userName] = _reports;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
