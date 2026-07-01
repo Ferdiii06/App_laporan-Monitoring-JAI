@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DefectReport;
+use App\Events\LaporanMonitoringUpdated;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -23,6 +24,9 @@ class ReportController extends Controller
         ]);
 
         $report = DefectReport::create($validated);
+
+        // Broadcast event ke monitoring-channel (real-time)
+        event(new LaporanMonitoringUpdated($report, 'created'));
 
         return response()->json([
             'status' => true,
@@ -68,6 +72,9 @@ class ReportController extends Controller
 
         $report->update($validated);
 
+        // Broadcast event ke monitoring-channel (real-time)
+        event(new LaporanMonitoringUpdated($report, 'updated'));
+
         return response()->json([
             'status' => true,
             'message' => 'Laporan berhasil diupdate',
@@ -81,6 +88,9 @@ class ReportController extends Controller
         if (!$report) {
             return response()->json(['status' => false, 'message' => 'Data tidak ditemukan'], 404);
         }
+
+        // Broadcast sebelum delete agar data masih tersedia
+        event(new LaporanMonitoringUpdated($report, 'deleted'));
 
         $report->delete();
 
