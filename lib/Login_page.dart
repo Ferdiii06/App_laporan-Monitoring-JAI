@@ -124,33 +124,18 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 80),
+                const SizedBox(height: 30),
 
                 // ── Logo YAZAKI ──
                 Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      CustomPaint(
-                        size: const Size(40, 30),
-                        painter: _YazakiLogoPainter(),
-                      ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'YAZAKI',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 2,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
+                  child: Image.asset(
+                    'assets/images/yazaki-logo.jpg',
+                    height: 250,
+                    fit: BoxFit.contain,
                   ),
                 ),
 
-                const SizedBox(height: 80),
+                const SizedBox(height: 30),
 
                 // ── Label Nama Lengkap ──
                 const Text(
