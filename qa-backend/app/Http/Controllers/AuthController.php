@@ -17,7 +17,7 @@ class AuthController extends Controller
         $request->validate([
             'nama' => 'required|string',
             'pin' => 'required|string|min:6',
-            'shift' => 'required|integer|in:1,2', // ← VALIDASI SHIFT
+            'shift' => 'required|integer|in:1,2',
         ]);
 
         // Cari user berdasarkan nama
@@ -41,7 +41,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // ⭐ CEK SHIFT
+        // Cek shift
         Log::info('Shift check:', [
             'input_shift' => $request->shift,
             'user_shift' => $user->shift
@@ -53,6 +53,10 @@ class AuthController extends Controller
                 'message' => 'Shift yang dipilih tidak sesuai. Anda terdaftar sebagai Shift ' . $user->shift . '.'
             ], 403);
         }
+
+        // Simpan waktu login terakhir
+        $user->last_login_at = now();
+        $user->save();
 
         // Login berhasil
         return response()->json([
