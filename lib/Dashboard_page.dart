@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'Login_page.dart';
 import 'features/Report_defect_pre_assy_page.dart';
 import 'features/Report_defect_final_assy_page.dart';
@@ -9,6 +11,7 @@ import 'features/edit/Edit_report_defect_pre_assy_page.dart';
 // MODEL: Data Report
 // ─────────────────────────────────────────
 class ReportItem {
+  final int? id;
   final String date;
   final String type;
   final String line;
@@ -19,6 +22,7 @@ class ReportItem {
   final String subDefect;
 
   const ReportItem({
+    this.id,
     required this.date,
     required this.type,
     required this.line,
@@ -54,15 +58,86 @@ class _DashboardPageState extends State<DashboardPage> {
   // ── Static Map untuk menampung riwayat defect per user ──
   static final Map<String, List<ReportItem>> _userReports = {};
 
-  late List<ReportItem> _reports;
+  late List<ReportItem> _reports = [];
+  bool _isLoading = false;
+  static const String _baseUrl = 'http://192.168.1.60:8000/api';
 
   @override
   void initState() {
     super.initState();
-    if (!_userReports.containsKey(widget.userName)) {
-      _reports = [];
-    } else {
-      _reports = _userReports[widget.userName]!;
+    _reports = [];
+    _fetchReports();
+  }
+
+  Future<void> _fetchReports() async {
+    setState(() => _isLoading = true);
+    try {
+      print('🔵 Fetching reports from $_baseUrl/reports');
+      final response = await http.get(Uri.parse('$_baseUrl/reports'));
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body['status'] == true) {
+          final List<dynamic> data = body['data'];
+          setState(() {
+            _reports = data.map((json) => ReportItem(
+              id: json['id'],
+              date: json['tanggal'] ?? '',
+              type: json['type'] ?? '',
+              line: json['line'] ?? '',
+              jenisMobil: json['jenis_mobil'] ?? '',
+              conveyor: json['conveyor'] ?? '',
+              defect: json['jenis_defect'] ?? '',
+              jumlah: json['jumlah'] ?? 0,
+              subDefect: json['sub_defect'] ?? '',
+            )).toList();
+          });
+        }
+      }
+    } catch (e) {
+      print('🔴 Error fetching reports: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _deleteReportFromApi(int reportId, int index) async {
+    setState(() => _isLoading = true);
+    try {
+      print('🔵 Deleting report: $reportId');
+      final response = await http.delete(
+        Uri.parse('$_baseUrl/reports/$reportId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          _reports.removeAt(index);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Laporan berhasil dihapus.'),
+            backgroundColor: yazakiRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8)),
+          ),
+        );
+      } else {
+        print('🔴 Server delete failed: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal menghapus laporan di server.')),
+        );
+      }
+    } catch (e) {
+      print('🔴 Error deleting report: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Koneksi bermasalah.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -70,6 +145,7 @@ class _DashboardPageState extends State<DashboardPage> {
   // DIALOG HAPUS
   // ─────────────────────────────────────────
   void _deleteReport(int index) {
+    final report = _reports[index];
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.45),
@@ -120,20 +196,23 @@ class _DashboardPageState extends State<DashboardPage> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      _reports.removeAt(index);
-                      _userReports[widget.userName] = _reports;
-                    });
                     Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Laporan berhasil dihapus.'),
-                        backgroundColor: yazakiRed,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                      ),
-                    );
+                    if (report.id != null) {
+                      _deleteReportFromApi(report.id!, index);
+                    } else {
+                      setState(() {
+                        _reports.removeAt(index);
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Laporan berhasil dihapus.'),
+                          backgroundColor: yazakiRed,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: yazakiRed,
@@ -298,28 +377,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       );
       if (result != null && mounted) {
-        setState(() {
-          _reports[index] = ReportItem(
-            date: result.tanggal.toUpperCase(),
-            type: 'Pre Assy',
-            line: result.line,
-            jenisMobil: result.jenisMobil,
-            conveyor: result.conveyor,
-            defect: result.jenisDefect,
-            jumlah: result.jumlah,
-            subDefect: result.subDefect,
-          );
-          _userReports[widget.userName] = _reports;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Laporan berhasil diperbarui.'),
-            backgroundColor: yazakiRed,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
-          ),
-        );
+        await _updateReportToApi(report.id, index, result.tanggal.toUpperCase(), 'Pre Assy', result);
       }
       return;
     }
@@ -340,30 +398,68 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       );
       if (result != null && mounted) {
-        setState(() {
-          _reports[index] = ReportItem(
-            date: result.tanggal.toUpperCase(),
-            type: 'Final Assy',
-            line: result.line,
-            jenisMobil: result.jenisMobil,
-            conveyor: result.conveyor,
-            defect: result.jenisDefect,
-            jumlah: result.jumlah,
-            subDefect: result.subDefect,
-          );
-          _userReports[widget.userName] = _reports;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Laporan berhasil diperbarui.'),
-            backgroundColor: yazakiRed,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
-          ),
-        );
+        await _updateReportToApi(report.id, index, result.tanggal.toUpperCase(), 'Final Assy', result);
       }
       return;
+    }
+  }
+
+  Future<void> _updateReportToApi(
+    int? reportId,
+    int index,
+    String tanggal,
+    String type,
+    dynamic result,
+  ) async {
+    setState(() => _isLoading = true);
+    try {
+      if (reportId != null) {
+        print('🔵 Updating report: $reportId');
+        final response = await http.put(
+          Uri.parse('$_baseUrl/reports/$reportId'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'tanggal': tanggal,
+            'line': result.line,
+            'jenis_mobil': result.jenisMobil,
+            'conveyor': result.conveyor,
+            'jenis_defect': result.jenisDefect,
+            'sub_defect': result.subDefect,
+            'jumlah': result.jumlah,
+          }),
+        );
+        if (response.statusCode == 200) {
+          // Reload dari server agar data sinkron
+          await _fetchReports();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Laporan berhasil diperbarui.'),
+                backgroundColor: yazakiRed,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+            );
+          }
+        } else {
+          print('🔴 Server update failed: ${response.body}');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Gagal memperbarui laporan di server.')),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      print('🔴 Error updating report: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Koneksi bermasalah saat update.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -407,30 +503,15 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       );
       if (result != null) {
-        setState(() {
-          _reports.insert(
-            0,
-            ReportItem(
-              date: result.tanggal.toUpperCase(),
-              type: 'Pre Assy',
-              line: result.line,
-              jenisMobil: result.jenisMobil,
-              conveyor: result.conveyor,
-              defect: result.jenisDefect,
-              jumlah: result.jumlah,
-              subDefect: result.subDefect,
-            ),
-          );
-          _userReports[widget.userName] = _reports;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Laporan defect berhasil dikirim.'),
-            backgroundColor: yazakiRed,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
-          ),
+        await _postReportToApi(
+          tanggal: result.tanggal,
+          type: 'Pre Assy',
+          line: result.line,
+          jenisMobil: result.jenisMobil,
+          conveyor: result.conveyor,
+          jenisDefect: result.jenisDefect,
+          subDefect: result.subDefect,
+          jumlah: result.jumlah,
         );
       }
       return;
@@ -444,33 +525,84 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       );
       if (result != null) {
-        setState(() {
-          _reports.insert(
-            0,
-            ReportItem(
-              date: result.tanggal.toUpperCase(),
-              type: 'Final Assy',
-              line: result.line,
-              jenisMobil: result.jenisMobil,
-              conveyor: result.conveyor,
-              defect: result.jenisDefect,
-              jumlah: result.jumlah,
-              subDefect: result.subDefect,
-            ),
-          );
-          _userReports[widget.userName] = _reports;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Laporan defect berhasil dikirim.'),
-            backgroundColor: yazakiRed,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
-          ),
+        await _postReportToApi(
+          tanggal: result.tanggal,
+          type: 'Final Assy',
+          line: result.line,
+          jenisMobil: result.jenisMobil,
+          conveyor: result.conveyor,
+          jenisDefect: result.jenisDefect,
+          subDefect: result.subDefect,
+          jumlah: result.jumlah,
         );
       }
       return;
+    }
+  }
+
+  Future<void> _postReportToApi({
+    required String tanggal,
+    required String type,
+    required String line,
+    required String jenisMobil,
+    required String conveyor,
+    required String jenisDefect,
+    required String subDefect,
+    required int jumlah,
+  }) async {
+    setState(() => _isLoading = true);
+    try {
+      print('🔵 Posting report to $_baseUrl/reports');
+      final response = await http.post(
+        Uri.parse('$_baseUrl/reports'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'nama_user': widget.userName,
+          'shift': widget.shift,
+          'tanggal': tanggal,
+          'type': type,
+          'line': line,
+          'jenis_mobil': jenisMobil,
+          'conveyor': conveyor,
+          'jenis_defect': jenisDefect,
+          'sub_defect': subDefect,
+          'jumlah': jumlah,
+        }),
+      );
+      if (response.statusCode == 200) {
+        print('🟢 Report posted successfully');
+        // Reload dari server agar data sinkron dengan dashboard
+        await _fetchReports();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Laporan defect berhasil dikirim ke server!'),
+              backgroundColor: yazakiRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+          );
+        }
+      } else {
+        print('🔴 Server post failed: ${response.body}');
+        final errBody = jsonDecode(response.body);
+        final msg = errBody['message'] ?? 'Gagal mengirim laporan.';
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(msg)),
+          );
+        }
+      }
+    } catch (e) {
+      print('🔴 Error posting report: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tidak dapat terhubung ke server.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -581,18 +713,37 @@ class _DashboardPageState extends State<DashboardPage> {
 
                       const SizedBox(height: 16),
 
-                      if (_reports.isEmpty)
+                      if (_isLoading)
                         const Center(
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 40),
+                            child: CircularProgressIndicator(
+                              color: Color(0xFFB71C1C),
+                              strokeWidth: 2.5,
+                            ),
+                          ),
+                        )
+                      else if (_reports.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 40),
                             child: Column(
                               children: [
-                                Icon(Icons.inbox_outlined,
+                                const Icon(Icons.inbox_outlined,
                                     size: 48, color: Colors.grey),
-                                SizedBox(height: 8),
-                                Text(
+                                const SizedBox(height: 8),
+                                const Text(
                                   'Belum ada riwayat report.',
                                   style: TextStyle(color: Colors.grey),
+                                ),
+                                const SizedBox(height: 16),
+                                TextButton.icon(
+                                  onPressed: _fetchReports,
+                                  icon: const Icon(Icons.refresh, size: 16),
+                                  label: const Text('Muat ulang'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: const Color(0xFFB71C1C),
+                                  ),
                                 ),
                               ],
                             ),
