@@ -14,8 +14,13 @@ Route::get('/', function () {
 // Route Users
 Route::get('/users', [UserApiController::class, 'index']);
 
+
 // Route Login - POST
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/heartbeat', [AuthController::class, 'heartbeat']);
+
+// Route Logout - POST
+Route::post('/logout', [AuthController::class, 'logout']);
 
 // Route Reports
 Route::prefix('reports')->group(function () {

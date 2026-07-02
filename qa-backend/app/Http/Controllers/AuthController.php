@@ -46,7 +46,6 @@ class AuthController extends Controller
             'input_shift' => $request->shift,
             'user_shift' => $user->shift
         ]);
-
         if ((int)$request->shift !== (int)$user->shift) {
             return response()->json([
                 'status' => false,
@@ -68,4 +67,61 @@ class AuthController extends Controller
             ]
         ]);
     }
+
+    // 🆕 METHOD BARU UNTUK HEARTBEAT (Active Users)
+    public function heartbeat(Request $request)
+    {
+        $request->validate([
+            'nama' => 'required|string',
+        ]);
+
+        $user = User::where('nama', $request->nama)->first();
+
+        if (!$user) {
+            Log::warning('Heartbeat - user not found:', ['nama' => $request->nama]);
+            return response()->json([
+                'status' => false,
+                'message' => 'User tidak ditemukan.'
+            ], 404);
+        }
+
+        $user->last_active_at = now();
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Heartbeat diterima',
+            'last_active_at' => $user->last_active_at,
+        ]);
+    }
+
+    // 🆕 METHOD BARU UNTUK ENDPOINT LOGOUT
+    public function logout(Request $request)
+    {
+        $request->validate([
+            'nama' => 'required|string',
+        ]);
+
+        $user = User::where('nama', $request->nama)->first();
+
+        if (!$user) {
+            Log::warning('Logout - user not found:', ['nama' => $request->nama]);
+            return response()->json([
+                'status' => false,
+                'message' => 'User tidak ditemukan.'
+            ], 404);
+        }
+
+        // Reset last_active_at saat logout
+        $user->last_active_at = null;
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Logout berhasil',
+        ]);
+    }
+
 }
+
+

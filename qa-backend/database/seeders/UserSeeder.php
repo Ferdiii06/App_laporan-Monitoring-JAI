@@ -10,7 +10,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::create([
-            'nama' => 'Muhammad Rizki',
+            'nama' => 'Muhammad',
             'pin' => '123456',
             'shift' => 1,
             'name' => 'Muhammad Rizki',
@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'nama' => 'Ahmad Fauzi',
+            'nama' => 'Ahmad',
             'pin' => '654321',
             'shift' => 2,
             'name' => 'Ahmad Fauzi',
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'nama' => 'Aqila Salamatudin'
+            'nama' => 'Aqila'
             , 'pin' => '123456',
             'shift' => 1,
             'name' => 'Aqila Salamatudin',
@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'nama' => 'Ferry Ferdiansyah'
+            'nama' => 'Ferry'
             , 'pin' => '123456',
             'shift' => 2,
             'name' => 'Ferry Ferdiansyah',

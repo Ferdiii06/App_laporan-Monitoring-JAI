@@ -11,7 +11,7 @@ class UserApiController extends Controller
     {
         return response()->json([
             'status' => true,
-            'data' => User::select('id', 'nama', 'shift', 'last_login_at')->get(),
+            'data' => User::select('id', 'nama', 'shift', 'last_login_at', 'last_active_at')->get(),
         ]);
     }
 }

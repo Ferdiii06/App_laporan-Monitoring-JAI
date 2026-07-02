@@ -6,6 +6,7 @@ import 'features/Report_defect_pre_assy_page.dart';
 import 'features/Report_defect_final_assy_page.dart';
 import 'features/edit/Edit_report_defect_final_assy_page.dart';
 import 'features/edit/Edit_report_defect_pre_assy_page.dart';
+import '../services/heartbeat_service.dart';
 
 // ─────────────────────────────────────────
 // MODEL: Data Report
@@ -67,6 +68,13 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
     _reports = [];
     _fetchReports();
+    HeartbeatService.startPeriodicHeartbeat(widget.userName);
+  }
+
+  @override
+  void dispose() {
+    HeartbeatService.stopHeartbeat();
+    super.dispose();
   }
 
   Future<void> _fetchReports() async {
@@ -311,9 +319,17 @@ class _DashboardPageState extends State<DashboardPage> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     Navigator.pop(ctx);
-                    Navigator.pushAndRemoveUntil(
+                    HeartbeatService.stopHeartbeat();
+                    await HeartbeatService.sendLogout(widget.userName);
+                    if (mounted) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                        (route) => false,
+                      );
+                    } (
                       context,
                       MaterialPageRoute(builder: (_) => const LoginPage()),
                       (route) => false,

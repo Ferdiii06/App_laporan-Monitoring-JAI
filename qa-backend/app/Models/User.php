@@ -26,6 +26,7 @@ class User extends Authenticatable
         'pin',
         'shift',
         'last_login_at',
+        'last_active_at',
     ];
 
     /**
