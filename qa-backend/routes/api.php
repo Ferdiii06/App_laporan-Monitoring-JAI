@@ -22,6 +22,9 @@ Route::post('/heartbeat', [AuthController::class, 'heartbeat']);
 // Route Logout - POST
 Route::post('/logout', [AuthController::class, 'logout']);
 
+// Route Register - POST
+Route::post('/users', [UserApiController::class, 'store']);
+
 // Route Reports
 Route::prefix('reports')->group(function () {
     Route::get('/', [ReportController::class, 'index']);
