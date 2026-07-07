@@ -81,7 +81,7 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() => _isLoading = true);
     try {
       print('🔵 Fetching reports from $_baseUrl/reports');
-      final response = await http.get(Uri.parse('$_baseUrl/reports'));
+      final response = await http.get(Uri.parse('$_baseUrl/reports?nama_user=${Uri.encodeComponent(widget.userName)}'));
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         if (body['status'] == true) {

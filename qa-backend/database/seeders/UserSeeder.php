@@ -11,21 +11,21 @@ class UserSeeder extends Seeder
     {
         User::create([
             'nama' => 'Muhammad',
-            'pin' => '123456',
+            'pin' => '444444',
             'shift' => 1,
             'name' => 'Muhammad Rizki',
         ]);
 
         User::create([
             'nama' => 'Ahmad',
-            'pin' => '654321',
+            'pin' => '333333',
             'shift' => 2,
             'name' => 'Ahmad Fauzi',
         ]);
 
         User::create([
             'nama' => 'Aqila'
-            , 'pin' => '123456',
+            , 'pin' => '111111',
             'shift' => 1,
             'name' => 'Aqila Salamatudin',
 
@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
 
         User::create([
             'nama' => 'Ferry'
-            , 'pin' => '123456',
+            , 'pin' => '222222',
             'shift' => 2,
             'name' => 'Ferry Ferdiansyah',
         ]);

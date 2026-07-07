@@ -35,14 +35,21 @@ class ReportController extends Controller
         ]);
     }
 
-    public function index()
-    {
-        $reports = DefectReport::orderBy('created_at', 'desc')->get();
-        return response()->json([
-            'status' => true,
-            'data' => $reports
-        ]);
+    public function index(Request $request)
+{
+    $query = DefectReport::query();
+
+    if ($request->has('nama_user')) {
+        $query->where('nama_user', $request->query('nama_user'));
     }
+
+    $reports = $query->orderBy('created_at', 'desc')->get();
+
+    return response()->json([
+        'status' => true,
+        'data' => $reports
+    ]);
+}
 
     public function show($id)
     {
