@@ -61,7 +61,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   late List<ReportItem> _reports = [];
   bool _isLoading = false;
-  static const String _baseUrl = 'http://192.168.1.60:8000/api';
+  static const String _baseUrl = 'http://10.49.236.139:8000/api';
 
   @override
   void initState() {
@@ -77,11 +77,15 @@ class _DashboardPageState extends State<DashboardPage> {
     super.dispose();
   }
 
+  // ✅ UPDATED: hanya fetch laporan milik user yang sedang login
   Future<void> _fetchReports() async {
     setState(() => _isLoading = true);
     try {
-      print('🔵 Fetching reports from $_baseUrl/reports');
-      final response = await http.get(Uri.parse('$_baseUrl/reports'));
+      final uri = Uri.parse('$_baseUrl/reports').replace(queryParameters: {
+        'nama_user': widget.userName,
+      });
+      print('🔵 Fetching reports from $uri');
+      final response = await http.get(uri);
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         if (body['status'] == true) {
@@ -110,14 +114,18 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  // ✅ UPDATED: kirim nama_user di body agar backend bisa cek kepemilikan
   Future<void> _deleteReportFromApi(int reportId, int index) async {
     setState(() => _isLoading = true);
     try {
       print('🔵 Deleting report: $reportId');
-      final response = await http.delete(
-        Uri.parse('$_baseUrl/reports/$reportId'),
-        headers: {'Content-Type': 'application/json'},
-      );
+      final request = http.Request('DELETE', Uri.parse('$_baseUrl/reports/$reportId'));
+      request.headers['Content-Type'] = 'application/json';
+      request.body = jsonEncode({'nama_user': widget.userName});
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
       if (response.statusCode == 200) {
         setState(() {
           _reports.removeAt(index);
@@ -130,6 +138,10 @@ class _DashboardPageState extends State<DashboardPage> {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8)),
           ),
+        );
+      } else if (response.statusCode == 403) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Anda tidak memiliki izin menghapus laporan ini.')),
         );
       } else {
         print('🔴 Server delete failed: ${response.body}');
@@ -329,11 +341,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         MaterialPageRoute(builder: (_) => const LoginPage()),
                         (route) => false,
                       );
-                    } (
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginPage()),
-                      (route) => false,
-                    );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: yazakiRed,
@@ -420,6 +428,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  // ✅ UPDATED: kirim nama_user di body agar backend bisa cek kepemilikan
   Future<void> _updateReportToApi(
     int? reportId,
     int index,
@@ -435,6 +444,7 @@ class _DashboardPageState extends State<DashboardPage> {
           Uri.parse('$_baseUrl/reports/$reportId'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
+            'nama_user': widget.userName,
             'tanggal': tanggal,
             'line': result.line,
             'jenis_mobil': result.jenisMobil,
@@ -456,6 +466,12 @@ class _DashboardPageState extends State<DashboardPage> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
               ),
+            );
+          }
+        } else if (response.statusCode == 403) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Anda tidak memiliki izin mengubah laporan ini.')),
             );
           }
         } else {
