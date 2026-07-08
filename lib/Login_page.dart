@@ -14,7 +14,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _pinController  = TextEditingController();
-  int _selectedShift = 1;
+  String _selectedShift = '1A';
   bool _isLoading    = false; // ← tambahan untuk loading state
 
   static const Color yazakiRed  = Color(0xFFB71C1C);
@@ -23,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
 
   // ⚠️ Ganti dengan IP laptop jaringan apapun biar bisa diakses sesama IP (cek via ipconfig di Windows)
   // Contoh: 'http://192.168.1.10:8000/api'
-  static const String _baseUrl = 'http://192.168.1.58:8000/api';
+  static const String _baseUrl = 'http://192.168.1.25:8000/api';
 
   @override
   void dispose() {
@@ -74,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
         if (response.statusCode == 200 && body['status'] == true) {
             final data = body['data'];
             final nama = data['nama'] as String;
-            final shiftData = data['shift'] as int;
+            final shiftData = data['shift'] as String;
 
             if (!mounted) return;
             Navigator.pushReplacement(
@@ -117,203 +117,211 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      // Agar konten tidak terangkat saat keyboard muncul — field PIN numerik
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 30),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final screenH = constraints.maxHeight;
+            // Ukuran adaptif berdasarkan tinggi layar
+            final logoH     = screenH * 0.38;   // 38% tinggi layar
+            final vPadTop   = screenH * 0.02;
+            final vGapLg    = screenH * 0.015;
+            final vGapSm    = screenH * 0.010;
+            final fieldH    = screenH * 0.068;
+            final btnH      = screenH * 0.068;
+            final shiftH    = screenH * 0.065;
+            final fontSize  = screenH < 600 ? 11.0 : 13.0;
 
-                // ── Logo YAZAKI ──
-                Center(
-                  child: Image.asset(
-                    'assets/images/yazaki-logo.jpg',
-                    height: 250,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                // ── Label Nama Lengkap ──
-                const Text(
-                  'Nama Lengkap',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: labelRed,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // ── Field Nama Lengkap ──
-                TextField(
-                  controller: _nameController,
-                  textCapitalization: TextCapitalization.words,
-                  style: const TextStyle(
-                    fontFamily: 'intern',
-                    fontSize: 14,
-                    letterSpacing: 1.5,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Masukan Nama Lengkap',
-                    hintStyle: const TextStyle(
-                      fontFamily: 'intern',
-                      fontSize: 13,
-                      color: Colors.grey,
-                      letterSpacing: 1.5,
-                    ),
-                    prefixIcon: const Icon(
-                      Icons.person_outline,
-                      color: Colors.grey,
-                      size: 20,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 14,
-                      horizontal: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: borderColor),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: borderColor),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: yazakiRed, width: 1.5),
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: vPadTop),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Logo YAZAKI ──
+                  Center(
+                    child: Image.asset(
+                      'assets/images/yazaki-logo.jpg',
+                      height: logoH,
+                      fit: BoxFit.contain,
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  SizedBox(height: vGapLg),
 
-                // ── Tombol Shift ──
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ShiftButton(
-                        label: 'Shift 1',
-                        isSelected: _selectedShift == 1,
-                        onTap: () => setState(() => _selectedShift = 1),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _ShiftButton(
-                        label: 'Shift 2',
-                        isSelected: _selectedShift == 2,
-                        onTap: () => setState(() => _selectedShift = 2),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-
-                // ── Label PIN ──
-                const Text(
-                  'PIN (6 Digit)',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: labelRed,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // ── Field PIN ──
-                TextField(
-                  controller: _pinController,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  obscuringCharacter: '•',
-                  style: const TextStyle(fontSize: 18, letterSpacing: 6),
-                  decoration: InputDecoration(
-                    hintText: '••••••',
-                    prefixIcon: const Icon(
-                      Icons.lock_outline,
-                      color: Colors.grey,
-                      size: 20,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 14,
-                      horizontal: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: borderColor),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: borderColor),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: yazakiRed, width: 1.5),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // ── Tombol Masuk ke Sistem ──
-                // Loading indicator muncul saat proses login, UI tidak berubah
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _login,
-                    icon: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Icon(Icons.arrow_forward,
-                            color: Colors.white, size: 20),
-                    label: Text(
-                      _isLoading ? 'Memproses...' : 'Masuk ke Sistem',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: yazakiRed,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      elevation: 0,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-                const Center(
-                  child: Text(
-                    'Server Target: 192.168.1.58:8000',
+                  // ── Label Nama Lengkap ──
+                  Text(
+                    'Nama Lengkap',
                     style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey,
+                      fontSize: fontSize,
+                      color: labelRed,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                ),
+                  SizedBox(height: vGapSm),
 
-                const SizedBox(height: 24),
-              ],
+                  // ── Field Nama Lengkap ──
+                  SizedBox(
+                    height: fieldH,
+                    child: TextField(
+                      controller: _nameController,
+                      textCapitalization: TextCapitalization.words,
+                      style: TextStyle(
+                        fontFamily: 'intern',
+                        fontSize: fontSize,
+                        letterSpacing: 1.2,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Masukan Nama Lengkap',
+                        hintStyle: TextStyle(
+                          fontFamily: 'intern',
+                          fontSize: fontSize - 1,
+                          color: Colors.grey,
+                        ),
+                        prefixIcon: const Icon(Icons.person_outline, color: Colors.grey, size: 18),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: borderColor)),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: borderColor)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: yazakiRed, width: 1.5)),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: vGapLg),
+
+                  // ── Label Shift ──
+                  Text(
+                    'Pilih Shift',
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      color: labelRed,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: vGapSm),
+
+                  // ── Tombol Shift 4 pilihan (Row 2x2) ──
+                  Row(
+                    children: [
+                      _buildShiftBtn('1A', shiftH),
+                      const SizedBox(width: 8),
+                      _buildShiftBtn('1B', shiftH),
+                      const SizedBox(width: 8),
+                      _buildShiftBtn('2A', shiftH),
+                      const SizedBox(width: 8),
+                      _buildShiftBtn('2B', shiftH),
+                    ],
+                  ),
+
+                  SizedBox(height: vGapLg),
+
+                  // ── Label PIN ──
+                  Text(
+                    'PIN (6 Digit)',
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      color: labelRed,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: vGapSm),
+
+                  // ── Field PIN ──
+                  SizedBox(
+                    height: fieldH,
+                    child: TextField(
+                      controller: _pinController,
+                      obscureText: true,
+                      keyboardType: TextInputType.number,
+                      maxLength: 6,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      obscuringCharacter: '•',
+                      style: const TextStyle(fontSize: 18, letterSpacing: 6),
+                      decoration: InputDecoration(
+                        hintText: '••••••',
+                        counterText: '',
+                        prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey, size: 18),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: borderColor)),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: borderColor)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: yazakiRed, width: 1.5)),
+                      ),
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  // ── Tombol Masuk ke Sistem ──
+                  SizedBox(
+                    width: double.infinity,
+                    height: btnH,
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _login,
+                      icon: _isLoading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                      label: Text(
+                        _isLoading ? 'Memproses...' : 'Masuk ke Sistem',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: fontSize + 1,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: yazakiRed,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: vGapSm),
+                  Center(
+                    child: Text(
+                      'Server Target: 192.168.1.25:8000',
+                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
+                  ),
+                  SizedBox(height: vGapSm),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShiftBtn(String shift, double height) {
+    final isSelected = _selectedShift == shift;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedShift = shift),
+        child: Container(
+          height: height,
+          decoration: BoxDecoration(
+            color: isSelected ? yazakiRed : Colors.white,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: isSelected ? yazakiRed : borderColor,
+              width: 1,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              shift,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? Colors.white : Colors.black87,
+              ),
             ),
           ),
         ),
@@ -322,50 +330,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-// ─────────────────────────────────────────
-// WIDGET: Tombol Shift — tidak berubah
-// ─────────────────────────────────────────
-class _ShiftButton extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ShiftButton({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 44,
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFB71C1C) : Colors.white,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: isSelected
-                ? const Color(0xFFB71C1C)
-                : const Color(0xFFCCCCCC),
-            width: 1,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: isSelected ? Colors.white : Colors.black87,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 // ─────────────────────────────────────────
 // PAINTER: Logo Segitiga Yazaki — tidak berubah

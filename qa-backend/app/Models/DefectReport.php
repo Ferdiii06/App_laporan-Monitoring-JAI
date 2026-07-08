@@ -13,12 +13,19 @@ class DefectReport extends Model
         'nama_user',
         'shift',
         'line',
-        'jenis_mobil',    // ← TAMBAHKAN
-        'conveyor',       // ← TAMBAHKAN
+        'jenis_mobil',
+        'conveyor',
         'jenis_defect',
         'sub_defect',
         'jumlah',
         'tanggal',
-        'type'
+        'type',
+        'end_number',
+        'specification',
+        'actual',
+        'area_ditemukan',
+        'job_station',
+        'no_terminal',
+        'no_mesin',
     ];
 }

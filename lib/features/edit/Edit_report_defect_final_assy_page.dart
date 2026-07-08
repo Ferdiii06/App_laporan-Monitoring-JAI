@@ -11,7 +11,12 @@ class EditReportDefectFinalAssyPage extends StatefulWidget {
   final String initialJenisDefect;
   final String initialSubDefect;
   final int initialJumlah;
-  final int shift;
+  final String shift;
+  final String? initialEndNumber;
+  final String? initialSpecification;
+  final String? initialActual;
+  final String? initialAreaDitemukan;
+  final String? initialJobStation;
 
   const EditReportDefectFinalAssyPage({
     super.key,
@@ -22,6 +27,11 @@ class EditReportDefectFinalAssyPage extends StatefulWidget {
     required this.initialSubDefect,
     required this.initialJumlah,
     required this.shift,
+    this.initialEndNumber,
+    this.initialSpecification,
+    this.initialActual,
+    this.initialAreaDitemukan,
+    this.initialJobStation,
   });
 
   @override
@@ -72,7 +82,7 @@ class _EditReportDefectFinalAssyPageState
     'WRONG ORIENTATION PART': ['8.A - ORIENTASI CLIP', '8.B - ORIENTASI BRANCH', '8.C - ORIENTASI GROMMET', '8.D - ORIENTASI COVER CONN.', '8.E - ORIENTASI N/P', '8.F - ORIENTASI TIE BACK' ],
     'CUTTING - CRIMPING PRE ASSY DEFECT': ['9.A -  SALAH BENTUK REAR CRIMPING', '9.B - BUTHYL MELELEH', '9.C - OVER MELT SHRINK TUBE', '9.D - SOLDER N-OK', '9.E - RAYCHAM N-OK', '9.F - BONDER LEPAS', '9.G - OVER CIRCUIT BONDER', '9.H - MISSING CIRCUIT BONDER', '9.I - SALAH CIRCUIT BONDER', '9.J - SALAH KIND WIRE ', '9.K - SALAH SIZE WIRE', '9.L - INSULATION MUNDUR', '9.N - SEAL RUBBER MUNDUR', '9.O - FRAYING CORE', '9.O - CRACK TERMINAL' ],
     'INJECTION GROMMET / SISUI DEFECT': ['10.A - INJECTION GROMMET BERGELEMBUNG', '10.B - INJECTION GROMMET KURANG', '10.C - INJECTION GROMMET TDK MATANG', '10.D - SISUI BOCOR'],
-    'OTHERS': ['11.A - FOREIGN MATERIAL', '11.B - CIRCUIT TERJEPIT', '11.C - AIR CHECKER N-OK', '11.D - BAND CLIP KEPENDEKAN', '11.E - BAND CLIP PANJANG'],
+    'LAIN-LAIN': ['11.A - FOREIGN MATERIAL', '11.B - CIRCUIT TERJEPIT', '11.C - AIR CHECKER N-OK', '11.D - BAND CLIP KEPENDEKAN', '11.E - BAND CLIP PANJANG'],
   };
 
   List<String> get _jenisMobilOptions => _conveyorMap.keys.toList();
@@ -87,6 +97,12 @@ class _EditReportDefectFinalAssyPageState
   late String? _selectedSubDefect;
   late DateTime _tanggalTemuan;
   late TextEditingController _qtyController;
+  late TextEditingController _endNumberController;
+  late TextEditingController _specificationController;
+  late TextEditingController _actualController;
+  late TextEditingController _areaDitemukanController;
+  late TextEditingController _jobStationController;
+  late TextEditingController _customSubDefectController;
 
   @override
   void initState() {
@@ -104,19 +120,43 @@ class _EditReportDefectFinalAssyPageState
     _selectedDefect = _defectMap.containsKey(widget.initialJenisDefect)
         ? widget.initialJenisDefect
         : null;
-    _selectedSubDefect = _selectedDefect != null &&
-            (_defectMap[_selectedDefect]?.contains(widget.initialSubDefect) ??
-                false)
-        ? widget.initialSubDefect
-        : null;
+    if (_selectedDefect != null) {
+      final list = _defectMap[_selectedDefect] ?? [];
+      if (list.contains(widget.initialSubDefect)) {
+        _selectedSubDefect = widget.initialSubDefect;
+        _customSubDefectController = TextEditingController();
+      } else {
+        _selectedSubDefect = 'LAIN-LAIN';
+        _customSubDefectController = TextEditingController(text: widget.initialSubDefect);
+      }
+    } else {
+      _selectedSubDefect = null;
+      _customSubDefectController = TextEditingController();
+    }
     _tanggalTemuan = _parseTanggal(widget.initialTanggal);
     _qtyController =
         TextEditingController(text: widget.initialJumlah.toString());
+    _endNumberController =
+        TextEditingController(text: widget.initialEndNumber ?? '');
+    _specificationController =
+        TextEditingController(text: widget.initialSpecification ?? '');
+    _actualController =
+        TextEditingController(text: widget.initialActual ?? '');
+    _areaDitemukanController =
+        TextEditingController(text: widget.initialAreaDitemukan ?? '');
+    _jobStationController =
+        TextEditingController(text: widget.initialJobStation ?? '');
   }
 
   @override
   void dispose() {
     _qtyController.dispose();
+    _endNumberController.dispose();
+    _specificationController.dispose();
+    _actualController.dispose();
+    _areaDitemukanController.dispose();
+    _jobStationController.dispose();
+    _customSubDefectController.dispose();
     super.dispose();
   }
 
@@ -167,15 +207,22 @@ class _EditReportDefectFinalAssyPageState
     if (picked != null) setState(() => _tanggalTemuan = picked);
   }
 
-  List<String> get _subDefectOptions =>
-      _selectedDefect == null ? [] : (_defectMap[_selectedDefect] ?? []);
+  List<String> get _subDefectOptions {
+    if (_selectedDefect == null) return [];
+    final list = _defectMap[_selectedDefect]?.toList() ?? [];
+    list.add('LAIN-LAIN');
+    return list;
+  }
 
-  bool get _isFormValid =>
-      _selectedJenisMobil != null &&
+  bool get _isFormValid {
+    final isSubDefectValid = _selectedSubDefect != null && 
+        (_selectedSubDefect != 'LAIN-LAIN' || _customSubDefectController.text.trim().isNotEmpty);
+    return _selectedJenisMobil != null &&
       _selectedConveyor != null &&
       _selectedDefect != null &&
-      _selectedSubDefect != null &&
+      isSubDefectValid &&
       (int.tryParse(_qtyController.text) ?? 0) > 0;
+  }
 
   void _simpanPerubahan() {
     if (!_isFormValid) {
@@ -197,8 +244,13 @@ class _EditReportDefectFinalAssyPageState
       jenisMobil: _selectedJenisMobil!,
       conveyor: _selectedConveyor!,
       jenisDefect: _selectedDefect!,
-      subDefect: _selectedSubDefect!,
+      subDefect: (_selectedSubDefect == 'LAIN-LAIN') ? _customSubDefectController.text.trim() : _selectedSubDefect!,
       jumlah: int.tryParse(_qtyController.text) ?? 0,
+      endNumber: _endNumberController.text.trim().isEmpty ? null : _endNumberController.text.trim(),
+      specification: _specificationController.text.trim().isEmpty ? null : _specificationController.text.trim(),
+      actual: _actualController.text.trim().isEmpty ? null : _actualController.text.trim(),
+      areaDitemukan: _areaDitemukanController.text.trim().isEmpty ? null : _areaDitemukanController.text.trim(),
+      jobStation: _jobStationController.text.trim().isEmpty ? null : _jobStationController.text.trim(),
     );
     Navigator.pop(context, result);
   }
@@ -345,8 +397,32 @@ class _EditReportDefectFinalAssyPageState
             value: _selectedSubDefect,
             hint: 'Pilih Sub-Defect',
             items: _subDefectOptions,
-            onChanged: (v) => setState(() => _selectedSubDefect = v),
+            onChanged: (v) => setState(() {
+              _selectedSubDefect = v;
+              if (v != 'LAIN-LAIN') _customSubDefectController.clear();
+            }),
           ),
+          if (_selectedSubDefect == 'LAIN-LAIN') ...[
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFFAFAFA),
+                border: Border.all(color: borderColor),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: TextField(
+                controller: _customSubDefectController,
+                textCapitalization: TextCapitalization.sentences,
+                style: const TextStyle(fontSize: 14),
+                decoration: const InputDecoration(
+                  hintText: 'Ketik sub-defect di sini...',
+                  hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 18),
 
           // ── JUMLAH ──
@@ -368,7 +444,13 @@ class _EditReportDefectFinalAssyPageState
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 18),
+          _buildTextInputField(label: 'END (#)', controller: _endNumberController, hint: 'Masukkan END (#)...'),
+          _buildTextInputField(label: 'SPECIFICATION', controller: _specificationController, hint: 'Masukkan Spesifikasi...'),
+          _buildTextInputField(label: 'ACTUAL', controller: _actualController, hint: 'Masukkan Aktual...'),
+          _buildTextInputField(label: 'AREA DITEMUKAN', controller: _areaDitemukanController, hint: 'Masukkan Area ditemukan...'),
+          _buildTextInputField(label: 'JOB STATION', controller: _jobStationController, hint: 'Masukkan Job Station...'),
+          const SizedBox(height: 14),
 
           // ── Tombol Simpan ──
           SizedBox(
@@ -445,6 +527,37 @@ class _EditReportDefectFinalAssyPageState
           onChanged: onChanged,
         ),
       ),
+    );
+  }
+
+  Widget _buildTextInputField({
+    required String label,
+    required TextEditingController controller,
+    String? hint,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFFAFAFA),
+            border: Border.all(color: borderColor),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: TextField(
+            controller: controller,
+            style: const TextStyle(fontSize: 14, color: Colors.black87),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              border: InputBorder.none,
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+      ],
     );
   }
 }

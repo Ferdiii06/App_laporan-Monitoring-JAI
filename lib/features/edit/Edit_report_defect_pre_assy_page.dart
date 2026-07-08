@@ -11,7 +11,9 @@ class EditReportDefectPreAssyPage extends StatefulWidget {
   final String initialJenisDefect;
   final String initialSubDefect;
   final int initialJumlah;
-  final int shift;
+  final String shift;
+  final String? initialNoTerminal;
+  final String? initialNoMesin;
 
   const EditReportDefectPreAssyPage({
     super.key,
@@ -22,6 +24,8 @@ class EditReportDefectPreAssyPage extends StatefulWidget {
     required this.initialSubDefect,
     required this.initialJumlah,
     required this.shift,
+    this.initialNoTerminal,
+    this.initialNoMesin,
   });
 
   @override
@@ -84,6 +88,9 @@ class _EditReportDefectPreAssyPageState
   late String? _selectedSubDefect;
   late DateTime _tanggalTemuan;
   late TextEditingController _qtyController;
+  late TextEditingController _noTerminalController;
+  late TextEditingController _noMesinController;
+  late TextEditingController _customSubDefectController;
 
   @override
   void initState() {
@@ -101,19 +108,34 @@ class _EditReportDefectPreAssyPageState
     _selectedDefect = _defectMap.containsKey(widget.initialJenisDefect)
         ? widget.initialJenisDefect
         : null;
-    _selectedSubDefect = _selectedDefect != null &&
-            (_defectMap[_selectedDefect]?.contains(widget.initialSubDefect) ??
-                false)
-        ? widget.initialSubDefect
-        : null;
+    if (_selectedDefect != null) {
+      final list = _defectMap[_selectedDefect] ?? [];
+      if (list.contains(widget.initialSubDefect)) {
+        _selectedSubDefect = widget.initialSubDefect;
+        _customSubDefectController = TextEditingController();
+      } else {
+        _selectedSubDefect = 'LAIN-LAIN';
+        _customSubDefectController = TextEditingController(text: widget.initialSubDefect);
+      }
+    } else {
+      _selectedSubDefect = null;
+      _customSubDefectController = TextEditingController();
+    }
     _tanggalTemuan = _parseTanggal(widget.initialTanggal);
     _qtyController =
         TextEditingController(text: widget.initialJumlah.toString());
+    _noTerminalController =
+        TextEditingController(text: widget.initialNoTerminal ?? '');
+    _noMesinController =
+        TextEditingController(text: widget.initialNoMesin ?? '');
   }
 
   @override
   void dispose() {
     _qtyController.dispose();
+    _noTerminalController.dispose();
+    _noMesinController.dispose();
+    _customSubDefectController.dispose();
     super.dispose();
   }
 
@@ -164,15 +186,22 @@ class _EditReportDefectPreAssyPageState
     if (picked != null) setState(() => _tanggalTemuan = picked);
   }
 
-  List<String> get _subDefectOptions =>
-      _selectedDefect == null ? [] : (_defectMap[_selectedDefect] ?? []);
+  List<String> get _subDefectOptions {
+    if (_selectedDefect == null) return [];
+    final list = _defectMap[_selectedDefect]?.toList() ?? [];
+    list.add('LAIN-LAIN');
+    return list;
+  }
 
-  bool get _isFormValid =>
-      _selectedJenisMobil != null &&
+  bool get _isFormValid {
+    final isSubDefectValid = _selectedSubDefect != null && 
+        (_selectedSubDefect != 'LAIN-LAIN' || _customSubDefectController.text.trim().isNotEmpty);
+    return _selectedJenisMobil != null &&
       _selectedConveyor != null &&
       _selectedDefect != null &&
-      _selectedSubDefect != null &&
+      isSubDefectValid &&
       (int.tryParse(_qtyController.text) ?? 0) > 0;
+  }
 
   void _simpanPerubahan() {
     if (!_isFormValid) {
@@ -194,8 +223,10 @@ class _EditReportDefectPreAssyPageState
       jenisMobil: _selectedJenisMobil!,
       conveyor: _selectedConveyor!,
       jenisDefect: _selectedDefect!,
-      subDefect: _selectedSubDefect!,
+      subDefect: (_selectedSubDefect == 'LAIN-LAIN') ? _customSubDefectController.text.trim() : _selectedSubDefect!,
       jumlah: int.tryParse(_qtyController.text) ?? 0,
+      noTerminal: _noTerminalController.text.trim().isEmpty ? null : _noTerminalController.text.trim(),
+      noMesin: _noMesinController.text.trim().isEmpty ? null : _noMesinController.text.trim(),
     );
     Navigator.pop(context, result);
   }
@@ -342,8 +373,32 @@ class _EditReportDefectPreAssyPageState
             value: _selectedSubDefect,
             hint: 'Pilih Sub-Defect',
             items: _subDefectOptions,
-            onChanged: (v) => setState(() => _selectedSubDefect = v),
+            onChanged: (v) => setState(() {
+              _selectedSubDefect = v;
+              if (v != 'LAIN-LAIN') _customSubDefectController.clear();
+            }),
           ),
+          if (_selectedSubDefect == 'LAIN-LAIN') ...[
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFFAFAFA),
+                border: Border.all(color: borderColor),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: TextField(
+                controller: _customSubDefectController,
+                textCapitalization: TextCapitalization.sentences,
+                style: const TextStyle(fontSize: 14),
+                decoration: const InputDecoration(
+                  hintText: 'Ketik sub-defect di sini...',
+                  hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 18),
 
           // ── JUMLAH ──
@@ -365,7 +420,10 @@ class _EditReportDefectPreAssyPageState
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 18),
+          _buildTextInputField(label: 'NO TERMINAL', controller: _noTerminalController, hint: 'Masukkan Nomor Terminal...'),
+          _buildTextInputField(label: 'NO MESIN', controller: _noMesinController, hint: 'Masukkan Nomor Mesin...'),
+          const SizedBox(height: 14),
 
           // ── Tombol Simpan ──
           SizedBox(
@@ -442,6 +500,37 @@ class _EditReportDefectPreAssyPageState
           onChanged: onChanged,
         ),
       ),
+    );
+  }
+
+  Widget _buildTextInputField({
+    required String label,
+    required TextEditingController controller,
+    String? hint,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFFAFAFA),
+            border: Border.all(color: borderColor),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: TextField(
+            controller: controller,
+            style: const TextStyle(fontSize: 14, color: Colors.black87),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              border: InputBorder.none,
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+      ],
     );
   }
 }

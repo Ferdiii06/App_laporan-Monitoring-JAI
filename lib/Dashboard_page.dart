@@ -21,6 +21,13 @@ class ReportItem {
   final String defect;
   final int jumlah;
   final String subDefect;
+  final String? endNumber;
+  final String? specification;
+  final String? actual;
+  final String? areaDitemukan;
+  final String? jobStation;
+  final String? noTerminal;
+  final String? noMesin;
 
   const ReportItem({
     this.id,
@@ -32,6 +39,13 @@ class ReportItem {
     required this.defect,
     required this.jumlah,
     required this.subDefect,
+    this.endNumber,
+    this.specification,
+    this.actual,
+    this.areaDitemukan,
+    this.jobStation,
+    this.noTerminal,
+    this.noMesin,
   });
 }
 
@@ -40,7 +54,7 @@ class ReportItem {
 // ─────────────────────────────────────────
 class DashboardPage extends StatefulWidget {
   final String userName;
-  final int shift;
+  final String shift;
 
   const DashboardPage({
     super.key,
@@ -61,7 +75,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   late List<ReportItem> _reports = [];
   bool _isLoading = false;
-  static const String _baseUrl = 'http://192.168.1.58:8000/api';
+  static const String _baseUrl = 'http://192.168.1.25:8000/api';
 
   @override
   void initState() {
@@ -101,6 +115,13 @@ class _DashboardPageState extends State<DashboardPage> {
               defect: json['jenis_defect'] ?? '',
               jumlah: json['jumlah'] ?? 0,
               subDefect: json['sub_defect'] ?? '',
+              endNumber: json['end_number'],
+              specification: json['specification'],
+              actual: json['actual'],
+              areaDitemukan: json['area_ditemukan'],
+              jobStation: json['job_station'],
+              noTerminal: json['no_terminal'],
+              noMesin: json['no_mesin'],
             )).toList();
           });
         }
@@ -397,6 +418,8 @@ class _DashboardPageState extends State<DashboardPage> {
             initialSubDefect: report.subDefect,
             initialJumlah: report.jumlah,
             shift: widget.shift,
+            initialNoTerminal: report.noTerminal,
+            initialNoMesin: report.noMesin,
           ),
         ),
       );
@@ -418,6 +441,11 @@ class _DashboardPageState extends State<DashboardPage> {
             initialSubDefect: report.subDefect,
             initialJumlah: report.jumlah,
             shift: widget.shift,
+            initialEndNumber: report.endNumber,
+            initialSpecification: report.specification,
+            initialActual: report.actual,
+            initialAreaDitemukan: report.areaDitemukan,
+            initialJobStation: report.jobStation,
           ),
         ),
       );
@@ -452,6 +480,13 @@ class _DashboardPageState extends State<DashboardPage> {
             'jenis_defect': result.jenisDefect,
             'sub_defect': result.subDefect,
             'jumlah': result.jumlah,
+            'end_number': result is FinalAssyReportResult ? result.endNumber : null,
+            'specification': result is FinalAssyReportResult ? result.specification : null,
+            'actual': result is FinalAssyReportResult ? result.actual : null,
+            'area_ditemukan': result is FinalAssyReportResult ? result.areaDitemukan : null,
+            'job_station': result is FinalAssyReportResult ? result.jobStation : null,
+            'no_terminal': result is DefectReportResult ? result.noTerminal : null,
+            'no_mesin': result is DefectReportResult ? result.noMesin : null,
           }),
         );
         if (response.statusCode == 200) {
@@ -544,6 +579,8 @@ class _DashboardPageState extends State<DashboardPage> {
           jenisDefect: result.jenisDefect,
           subDefect: result.subDefect,
           jumlah: result.jumlah,
+          noTerminal: result.noTerminal,
+          noMesin: result.noMesin,
         );
       }
       return;
@@ -566,6 +603,11 @@ class _DashboardPageState extends State<DashboardPage> {
           jenisDefect: result.jenisDefect,
           subDefect: result.subDefect,
           jumlah: result.jumlah,
+          endNumber: result.endNumber,
+          specification: result.specification,
+          actual: result.actual,
+          areaDitemukan: result.areaDitemukan,
+          jobStation: result.jobStation,
         );
       }
       return;
@@ -581,6 +623,13 @@ class _DashboardPageState extends State<DashboardPage> {
     required String jenisDefect,
     required String subDefect,
     required int jumlah,
+    String? endNumber,
+    String? specification,
+    String? actual,
+    String? areaDitemukan,
+    String? jobStation,
+    String? noTerminal,
+    String? noMesin,
   }) async {
     setState(() => _isLoading = true);
     try {
@@ -599,6 +648,13 @@ class _DashboardPageState extends State<DashboardPage> {
           'jenis_defect': jenisDefect,
           'sub_defect': subDefect,
           'jumlah': jumlah,
+          'end_number': endNumber,
+          'specification': specification,
+          'actual': actual,
+          'area_ditemukan': areaDitemukan,
+          'job_station': jobStation,
+          'no_terminal': noTerminal,
+          'no_mesin': noMesin,
         }),
       );
       if (response.statusCode == 200) {
@@ -673,7 +729,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                         ),
                         const Text(
-                          'Server: 192.168.1.58:8000',
+                          'Server: 192.168.1.25:8000',
                           style: TextStyle(
                             fontSize: 9,
                             color: Colors.grey,
@@ -1082,8 +1138,76 @@ class _ReportCard extends StatelessWidget {
               maxLines: 2,
             ),
           ),
+
+          // ── Additional Fields (END, Specification, Actual, Area, Job, Terminal, Mesin) ──
+          if ((report.endNumber != null && report.endNumber!.isNotEmpty) ||
+              (report.specification != null && report.specification!.isNotEmpty) ||
+              (report.actual != null && report.actual!.isNotEmpty) ||
+              (report.areaDitemukan != null && report.areaDitemukan!.isNotEmpty) ||
+              (report.jobStation != null && report.jobStation!.isNotEmpty) ||
+              (report.noTerminal != null && report.noTerminal!.isNotEmpty) ||
+              (report.noMesin != null && report.noMesin!.isNotEmpty)) ...[
+            const Divider(height: 1, color: borderColor),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (report.endNumber != null && report.endNumber!.isNotEmpty) ...[
+                    _buildRowDetail('END (#)', report.endNumber!),
+                    const SizedBox(height: 6),
+                  ],
+                  if (report.specification != null && report.specification!.isNotEmpty) ...[
+                    _buildRowDetail('Specification', report.specification!),
+                    const SizedBox(height: 6),
+                  ],
+                  if (report.actual != null && report.actual!.isNotEmpty) ...[
+                    _buildRowDetail('Actual', report.actual!),
+                    const SizedBox(height: 6),
+                  ],
+                  if (report.areaDitemukan != null && report.areaDitemukan!.isNotEmpty) ...[
+                    _buildRowDetail('Area Ditemukan', report.areaDitemukan!),
+                    const SizedBox(height: 6),
+                  ],
+                  if (report.jobStation != null && report.jobStation!.isNotEmpty) ...[
+                    _buildRowDetail('Job Station', report.jobStation!),
+                    const SizedBox(height: 6),
+                  ],
+                  if (report.noTerminal != null && report.noTerminal!.isNotEmpty) ...[
+                    _buildRowDetail('No Terminal', report.noTerminal!),
+                    const SizedBox(height: 6),
+                  ],
+                  if (report.noMesin != null && report.noMesin!.isNotEmpty) ...[
+                    _buildRowDetail('No Mesin', report.noMesin!),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildRowDetail(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 12, color: Colors.black87, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
     );
   }
 }

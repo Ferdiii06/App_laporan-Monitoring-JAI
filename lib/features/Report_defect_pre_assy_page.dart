@@ -7,23 +7,27 @@ import 'dart:async';
   // ─────────────────────────────────────────
   class DefectReportResult {
     final String tanggal;
-    final int shift;
+    final String shift;
     final String line;
-    final String jenisMobil;  // ← TAMBAHKAN
-    final String conveyor;     // ← TAMBAHKAN
+    final String jenisMobil;
+    final String conveyor;
     final String jenisDefect;
     final String subDefect;
     final int jumlah;
+    final String? noTerminal;
+    final String? noMesin;
 
     const DefectReportResult({
       required this.tanggal,
       required this.shift,
       required this.line,
-      required this.jenisMobil,  // ← TAMBAHKAN
-      required this.conveyor,     // ← TAMBAHKAN
+      required this.jenisMobil,
+      required this.conveyor,
       required this.jenisDefect,
       required this.subDefect,
       required this.jumlah,
+      this.noTerminal,
+      this.noMesin,
     });
   }
 
@@ -31,7 +35,7 @@ import 'dart:async';
   // PAGE: Report Defect Pre Assy (2 Langkah)
   // ─────────────────────────────────────────
   class ReportDefectPreAssyPage extends StatefulWidget {
-    final int shift;
+    final String shift;
 
     const ReportDefectPreAssyPage({super.key, required this.shift});
 
@@ -97,11 +101,16 @@ import 'dart:async';
     DateTime _tanggalTemuan = DateTime.now();
     final TextEditingController _qtyController =
         TextEditingController(text: '');
-
+    final TextEditingController _noTerminalController = TextEditingController();
+    final TextEditingController _noMesinController = TextEditingController();
+    final TextEditingController _customSubDefectController = TextEditingController();
     @override
     void dispose() {
       _timer.cancel();
       _qtyController.dispose();
+      _noTerminalController.dispose();
+      _noMesinController.dispose();
+      _customSubDefectController.dispose();
       super.dispose();
     }
 
@@ -118,8 +127,12 @@ void initState() {
 }
 
 
-    List<String> get _subDefectOptions =>
-        _selectedDefect == null ? [] : (_defectMap[_selectedDefect] ?? []);
+    List<String> get _subDefectOptions {
+      if (_selectedDefect == null) return [];
+      final list = _defectMap[_selectedDefect]?.toList() ?? [];
+      list.add('LAIN-LAIN');
+      return list;
+    }
 
     String _formatTanggal(DateTime d) {
       return '${d.month.toString().padLeft(2, '0')}/'
@@ -152,10 +165,13 @@ void initState() {
 
     bool get _isFormValid {
       final qty = int.tryParse(_qtyController.text) ?? 0;
+      final isSubDefectValid = _selectedSubDefect != null && 
+          (_selectedSubDefect != 'LAIN-LAIN' || _customSubDefectController.text.trim().isNotEmpty);
+      
       return _selectedJenisMobil != null &&
           _selectedConveyor != null &&
           _selectedDefect != null &&
-          _selectedSubDefect != null &&
+          isSubDefectValid &&
           qty > 0;
     }
 
@@ -182,8 +198,10 @@ void initState() {
         jenisMobil: _selectedJenisMobil!,
         conveyor: _selectedConveyor!,
         jenisDefect: _selectedDefect!,
-        subDefect: _selectedSubDefect!,
+        subDefect: (_selectedSubDefect == 'LAIN-LAIN') ? _customSubDefectController.text.trim() : _selectedSubDefect!,
         jumlah: int.tryParse(_qtyController.text) ?? 0,
+        noTerminal: _noTerminalController.text.trim().isEmpty ? null : _noTerminalController.text.trim(),
+        noMesin: _noMesinController.text.trim().isEmpty ? null : _noMesinController.text.trim(),
       );
       Navigator.pop(context, result);
     }
@@ -355,8 +373,32 @@ void initState() {
               value: _selectedSubDefect,
               hint: 'Pilih Sub-Defect',
               items: _subDefectOptions,
-              onChanged: (v) => setState(() => _selectedSubDefect = v),
+              onChanged: (v) => setState(() {
+                _selectedSubDefect = v;
+                if (v != 'LAIN-LAIN') _customSubDefectController.clear();
+              }),
             ),
+            if (_selectedSubDefect == 'LAIN-LAIN') ...[
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFAFAFA),
+                  border: Border.all(color: borderColor),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: TextField(
+                  controller: _customSubDefectController,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: const TextStyle(fontSize: 14),
+                  decoration: const InputDecoration(
+                    hintText: 'Ketik sub-defect di sini...',
+                    hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 18),
 
           _buildLabel('JUMLAH (QUANTITY)'),
@@ -381,7 +423,10 @@ void initState() {
       ),
     ),
   ),
-            const SizedBox(height: 32),
+          const SizedBox(height: 18),
+          _buildTextInputField(label: 'NO TERMINAL', controller: _noTerminalController, hint: 'Masukkan Nomor Terminal...'),
+          _buildTextInputField(label: 'NO MESIN', controller: _noMesinController, hint: 'Masukkan Nomor Mesin...'),
+          const SizedBox(height: 14),
 
             SizedBox(
               width: double.infinity,
@@ -528,7 +573,11 @@ void initState() {
                   const SizedBox(height: 14),
                   _buildDetailField('JENIS DEFECT', _selectedDefect ?? '-'),
                   const SizedBox(height: 14),
-                  _buildDetailField('JENIS SUB-DEFECT', _selectedSubDefect ?? '-'),
+                  _buildDetailField('JENIS SUB-DEFECT', _selectedSubDefect == 'LAIN-LAIN' ? _customSubDefectController.text.trim() : (_selectedSubDefect ?? '-')),
+                  const Divider(height: 24, color: borderColor),
+                  _buildDetailField('NO TERMINAL', _noTerminalController.text.trim().isEmpty ? '-' : _noTerminalController.text.trim()),
+                  const SizedBox(height: 14),
+                  _buildDetailField('NO MESIN', _noMesinController.text.trim().isEmpty ? '-' : _noMesinController.text.trim()),
                   const Divider(height: 24, color: borderColor),
                   _buildDetailField('JUMLAH / QUANTITY', _qtyController.text),
                 ],
@@ -611,6 +660,37 @@ void initState() {
           Text(value,
               style: const TextStyle(
                   fontSize: 15, fontWeight: FontWeight.w700, color: Colors.black)),
+        ],
+      );
+    }
+
+    Widget _buildTextInputField({
+      required String label,
+      required TextEditingController controller,
+      String? hint,
+    }) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(label),
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFFAFAFA),
+              border: Border.all(color: borderColor),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: TextField(
+              controller: controller,
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
         ],
       );
     }

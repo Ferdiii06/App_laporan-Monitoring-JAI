@@ -4,7 +4,7 @@ import 'dart:convert';
 
 class HeartbeatService {
   static Timer? _timer;
-  static const String _baseUrl = 'http://192.168.1.58:8000/api';
+  static const String _baseUrl = 'http://192.168.1.25:8000/api';
 
   static Future<void> sendHeartbeat(String nama) async {
     try {

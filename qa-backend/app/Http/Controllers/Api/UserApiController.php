@@ -25,7 +25,7 @@ class UserApiController extends Controller
     $validated = $request->validate([
         'nama' => 'required|string|max:255',
         'pin' => 'required|digits:6',
-        'shift' => 'required|integer|in:1,2',
+        'shift' => 'required|string|in:1A,1B,2A,2B',
     ]);
 
     $user = User::create([

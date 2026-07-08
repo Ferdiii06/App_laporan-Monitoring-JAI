@@ -10,7 +10,7 @@ class ReportController extends Controller
     {
         $validated = $request->validate([
             'nama_user' => 'required|string',
-            'shift' => 'required|integer',
+            'shift' => 'required|string|in:1A,1B,2A,2B',
             'line' => 'required|string',
             'jenis_mobil' => 'required|string',
             'conveyor' => 'required|string',
@@ -19,6 +19,13 @@ class ReportController extends Controller
             'jumlah' => 'required|integer|min:1',
             'tanggal' => 'required|string',
             'type' => 'required|string',
+            'end_number' => 'nullable|string',
+            'specification' => 'nullable|string',
+            'actual' => 'nullable|string',
+            'area_ditemukan' => 'nullable|string',
+            'job_station' => 'nullable|string',
+            'no_terminal' => 'nullable|string',
+            'no_mesin' => 'nullable|string',
         ]);
         $report = DefectReport::create($validated);
 
@@ -88,6 +95,13 @@ class ReportController extends Controller
             'sub_defect' => 'string',
             'jumlah' => 'integer|min:1',
             'tanggal' => 'string',
+            'end_number' => 'nullable|string',
+            'specification' => 'nullable|string',
+            'actual' => 'nullable|string',
+            'area_ditemukan' => 'nullable|string',
+            'job_station' => 'nullable|string',
+            'no_terminal' => 'nullable|string',
+            'no_mesin' => 'nullable|string',
         ]);
         $report->update($validated);
         event(new LaporanMonitoringUpdated($report, 'updated'));

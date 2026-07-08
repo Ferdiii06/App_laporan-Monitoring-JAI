@@ -18,7 +18,7 @@ class AuthController extends Controller
         $request->validate([
             'nama' => 'required|string',
             'pin' => 'required|string|min:6',
-            'shift' => 'required|integer|in:1,2',
+            'shift' => 'required|string|in:1A,1B,2A,2B',
         ]);
 
         // Cari user berdasarkan nama
@@ -47,7 +47,7 @@ class AuthController extends Controller
             'input_shift' => $request->shift,
             'user_shift' => $user->shift
         ]);
-        if ((int)$request->shift !== (int)$user->shift) {
+        if ($request->shift !== $user->shift) {
             return response()->json([
                 'status' => false,
                 'message' => 'Shift yang dipilih tidak sesuai. Anda terdaftar sebagai Shift ' . $user->shift . '.'
