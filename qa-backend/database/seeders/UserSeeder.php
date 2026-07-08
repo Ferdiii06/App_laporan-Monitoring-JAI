@@ -14,6 +14,7 @@ class UserSeeder extends Seeder
             'pin' => '444444',
             'shift' => 1,
             'name' => 'Muhammad Rizki',
+            'password' => bcrypt('123456'),
         ]);
 
         User::create([
@@ -21,21 +22,23 @@ class UserSeeder extends Seeder
             'pin' => '333333',
             'shift' => 2,
             'name' => 'Ahmad Fauzi',
+            'password' => bcrypt('654321'),
         ]);
 
         User::create([
-            'nama' => 'Aqila'
-            , 'pin' => '111111',
+            'nama' => 'Aqila',
+            'pin' => '111111',
             'shift' => 1,
             'name' => 'Aqila Salamatudin',
-
+            'password' => bcrypt('123456'),
         ]);
 
         User::create([
-            'nama' => 'Ferry'
-            , 'pin' => '222222',
+            'nama' => 'Ferry',
+            'pin' => '222222',
             'shift' => 2,
             'name' => 'Ferry Ferdiansyah',
+            'password' => bcrypt('123456'),
         ]);
     }
 }
