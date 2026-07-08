@@ -22,7 +22,7 @@ class HeartbeatService {
   static void startPeriodicHeartbeat(String nama) {
     sendHeartbeat(nama);
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(minutes: 5), (timer) {
+    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
       sendHeartbeat(nama);
     });
   }

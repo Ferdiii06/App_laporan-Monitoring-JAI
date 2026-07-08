@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Events\UserStatusUpdated;
 
 class AuthController extends Controller
 {
@@ -53,9 +54,12 @@ class AuthController extends Controller
             ], 403);
         }
 
-        // Simpan waktu login terakhir
+        // Simpan waktu login dan keaktifan terakhir
         $user->last_login_at = now();
+        $user->last_active_at = now();
         $user->save();
+
+        event(new UserStatusUpdated());
 
         // Login berhasil
         return response()->json([
@@ -88,6 +92,8 @@ class AuthController extends Controller
         $user->last_active_at = now();
         $user->save();
 
+        event(new UserStatusUpdated());
+
         return response()->json([
             'status' => true,
             'message' => 'Heartbeat diterima',
@@ -115,6 +121,8 @@ class AuthController extends Controller
         // Reset last_active_at saat logout
         $user->last_active_at = null;
         $user->save();
+
+        event(new UserStatusUpdated());
 
         return response()->json([
             'status' => true,

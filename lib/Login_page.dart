@@ -300,7 +300,19 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 16),
+                const Center(
+                  child: Text(
+                    'Server Target: 192.168.1.58:8000',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
               ],
             ),
           ),

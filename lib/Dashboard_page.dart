@@ -661,13 +661,25 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      widget.userName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: yazakiRed,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.userName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: yazakiRed,
+                          ),
+                        ),
+                        const Text(
+                          'Server: 192.168.1.58:8000',
+                          style: TextStyle(
+                            fontSize: 9,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
                     ),
                     GestureDetector(
                       onTap: _logout,
