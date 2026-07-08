@@ -4,12 +4,12 @@ import 'dart:convert';
 
 class HeartbeatService {
   static Timer? _timer;
-  static const String _heartbeatUrl = 'http://192.168.1.25:8000/api/heartbeat';
+  static const String _baseUrl = 'http://192.168.1.58:8000/api';
 
   static Future<void> sendHeartbeat(String nama) async {
     try {
       final response = await http.post(
-        Uri.parse(_heartbeatUrl),
+        Uri.parse('$_baseUrl/heartbeat'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'nama': nama}),
       );
@@ -35,7 +35,7 @@ class HeartbeatService {
   static Future<void> sendLogout(String nama) async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.1.25:8000/api/logout'),
+        Uri.parse('$_baseUrl/logout'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'nama': nama}),
       );

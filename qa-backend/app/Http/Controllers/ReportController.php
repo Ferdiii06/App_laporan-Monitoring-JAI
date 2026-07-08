@@ -21,7 +21,8 @@ class ReportController extends Controller
             'type' => 'required|string',
         ]);
         $report = DefectReport::create($validated);
-        
+
+
         \Log::info('dYY BEFORE EVENT DISPATCH - created', ['id' => $report->id]);
         try {
             event(new LaporanMonitoringUpdated($report, 'created'));
