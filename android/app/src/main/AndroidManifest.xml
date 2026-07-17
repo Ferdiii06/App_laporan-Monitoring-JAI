@@ -2,7 +2,7 @@
 <uses-permission android:name="android.permission.INTERNET" />
     <application
      android:networkSecurityConfig="@xml/network_security_config"
-        android:label="qa_app"
+        android:label="Report Internal Defect"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

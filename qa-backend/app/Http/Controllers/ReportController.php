@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use App\Models\DefectReport;
 use App\Events\LaporanMonitoringUpdated;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
@@ -30,12 +31,12 @@ class ReportController extends Controller
         $report = DefectReport::create($validated);
 
 
-        \Log::info('dYY BEFORE EVENT DISPATCH - created', ['id' => $report->id]);
+        Log::info('dYY BEFORE EVENT DISPATCH - created', ['id' => $report->id]);
         try {
             event(new LaporanMonitoringUpdated($report, 'created'));
-            \Log::info('dYY EVENT DISPATCHED SUCCESSFULLY - created');
+            Log::info('dYY EVENT DISPATCHED SUCCESSFULLY - created');
         } catch (\Exception $e) {
-            \Log::error('dY"' . ' EVENT DISPATCH FAILED - created: ' . $e->getMessage());
+            Log::error('dY"' . ' EVENT DISPATCH FAILED - created: ' . $e->getMessage());
         }
 
         return response()->json([

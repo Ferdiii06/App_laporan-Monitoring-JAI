@@ -4,13 +4,13 @@ import 'dart:convert';
 
 class HeartbeatService {
   static Timer? _timer;
-  static const String _baseUrl = 'http://192.168.1.25:8000/api';
+  static const String _baseUrl = 'https://untie-mumble-sasquatch.ngrok-free.dev/api';
 
   static Future<void> sendHeartbeat(String nama) async {
     try {
       final response = await http.post(
         Uri.parse('$_baseUrl/heartbeat'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true', 'Bypass-Tunnel-Reminder': 'true'},
         body: jsonEncode({'nama': nama}),
       );
       print('Heartbeat status: ${response.statusCode}');
@@ -36,7 +36,7 @@ class HeartbeatService {
     try {
       final response = await http.post(
         Uri.parse('$_baseUrl/logout'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true', 'Bypass-Tunnel-Reminder': 'true'},
         body: jsonEncode({'nama': nama}),
       );
       print('Logout status: ${response.statusCode}');

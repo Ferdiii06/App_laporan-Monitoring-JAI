@@ -56,11 +56,7 @@ class DashboardPage extends StatefulWidget {
   final String userName;
   final String shift;
 
-  const DashboardPage({
-    super.key,
-    required this.userName,
-    required this.shift,
-  });
+  const DashboardPage({super.key, required this.userName, required this.shift});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -75,7 +71,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
   late List<ReportItem> _reports = [];
   bool _isLoading = false;
-  static const String _baseUrl = 'http://192.168.1.25:8000/api';
+  static const String _baseUrl =
+      'https://untie-mumble-sasquatch.ngrok-free.dev/api';
 
   @override
   void initState() {
@@ -95,34 +92,41 @@ class _DashboardPageState extends State<DashboardPage> {
   Future<void> _fetchReports() async {
     setState(() => _isLoading = true);
     try {
-      final uri = Uri.parse('$_baseUrl/reports').replace(queryParameters: {
-        'nama_user': widget.userName,
-      });
+      final uri = Uri.parse(
+        '$_baseUrl/reports',
+      ).replace(queryParameters: {'nama_user': widget.userName});
       print('🔵 Fetching reports from $uri');
-      final response = await http.get(uri);
+      final response = await http.get(
+        uri,
+        headers: {'ngrok-skip-browser-warning': 'true', 'Bypass-Tunnel-Reminder': 'true'},
+      );
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         if (body['status'] == true) {
           final List<dynamic> data = body['data'];
           setState(() {
-            _reports = data.map((json) => ReportItem(
-              id: json['id'],
-              date: json['tanggal'] ?? '',
-              type: json['type'] ?? '',
-              line: json['line'] ?? '',
-              jenisMobil: json['jenis_mobil'] ?? '',
-              conveyor: json['conveyor'] ?? '',
-              defect: json['jenis_defect'] ?? '',
-              jumlah: json['jumlah'] ?? 0,
-              subDefect: json['sub_defect'] ?? '',
-              endNumber: json['end_number'],
-              specification: json['specification'],
-              actual: json['actual'],
-              areaDitemukan: json['area_ditemukan'],
-              jobStation: json['job_station'],
-              noTerminal: json['no_terminal'],
-              noMesin: json['no_mesin'],
-            )).toList();
+            _reports = data
+                .map(
+                  (json) => ReportItem(
+                    id: json['id'],
+                    date: json['tanggal'] ?? '',
+                    type: json['type'] ?? '',
+                    line: json['line'] ?? '',
+                    jenisMobil: json['jenis_mobil'] ?? '',
+                    conveyor: json['conveyor'] ?? '',
+                    defect: json['jenis_defect'] ?? '',
+                    jumlah: json['jumlah'] ?? 0,
+                    subDefect: json['sub_defect'] ?? '',
+                    endNumber: json['end_number'],
+                    specification: json['specification'],
+                    actual: json['actual'],
+                    areaDitemukan: json['area_ditemukan'],
+                    jobStation: json['job_station'],
+                    noTerminal: json['no_terminal'],
+                    noMesin: json['no_mesin'],
+                  ),
+                )
+                .toList();
           });
         }
       }
@@ -140,8 +144,13 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() => _isLoading = true);
     try {
       print('🔵 Deleting report: $reportId');
-      final request = http.Request('DELETE', Uri.parse('$_baseUrl/reports/$reportId'));
+      final request = http.Request(
+        'DELETE',
+        Uri.parse('$_baseUrl/reports/$reportId'),
+      );
       request.headers['Content-Type'] = 'application/json';
+      request.headers['ngrok-skip-browser-warning'] = 'true';
+      request.headers['Bypass-Tunnel-Reminder'] = 'true';
       request.body = jsonEncode({'nama_user': widget.userName});
 
       final streamedResponse = await request.send();
@@ -157,12 +166,15 @@ class _DashboardPageState extends State<DashboardPage> {
             backgroundColor: yazakiRed,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
       } else if (response.statusCode == 403) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Anda tidak memiliki izin menghapus laporan ini.')),
+          const SnackBar(
+            content: Text('Anda tidak memiliki izin menghapus laporan ini.'),
+          ),
         );
       } else {
         print('🔴 Server delete failed: ${response.body}');
@@ -172,9 +184,9 @@ class _DashboardPageState extends State<DashboardPage> {
       }
     } catch (e) {
       print('🔴 Error deleting report: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Koneksi bermasalah.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Koneksi bermasalah.')));
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -225,11 +237,7 @@ class _DashboardPageState extends State<DashboardPage> {
               const Text(
                 'Apakah yakin ingin menghapus data ini?\nTindakan ini tidak dapat dibatalkan.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: yazakiRed,
-                  height: 1.5,
-                ),
+                style: TextStyle(fontSize: 13, color: yazakiRed, height: 1.5),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -250,7 +258,8 @@ class _DashboardPageState extends State<DashboardPage> {
                           backgroundColor: yazakiRed,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       );
                     }
@@ -260,14 +269,12 @@ class _DashboardPageState extends State<DashboardPage> {
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   child: const Text(
                     'Hapus',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -281,14 +288,12 @@ class _DashboardPageState extends State<DashboardPage> {
                     foregroundColor: Colors.black87,
                     side: const BorderSide(color: Color(0xFFDDDDDD)),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   child: const Text(
                     'Batal',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                   ),
                 ),
               ),
@@ -341,11 +346,7 @@ class _DashboardPageState extends State<DashboardPage> {
               const Text(
                 'Apakah Anda yakin ingin keluar\ndari sistem ini?',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: yazakiRed,
-                  height: 1.5,
-                ),
+                style: TextStyle(fontSize: 13, color: yazakiRed, height: 1.5),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -369,7 +370,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   child: const Text(
                     'Logout',
@@ -387,7 +389,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     foregroundColor: Colors.black87,
                     side: const BorderSide(color: Color(0xFFDDDDDD)),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   child: const Text(
                     'Batal',
@@ -424,7 +427,13 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       );
       if (result != null && mounted) {
-        await _updateReportToApi(report.id, index, result.tanggal.toUpperCase(), 'Pre Assy', result);
+        await _updateReportToApi(
+          report.id,
+          index,
+          result.tanggal.toUpperCase(),
+          'Pre Assy',
+          result,
+        );
       }
       return;
     }
@@ -450,7 +459,13 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       );
       if (result != null && mounted) {
-        await _updateReportToApi(report.id, index, result.tanggal.toUpperCase(), 'Final Assy', result);
+        await _updateReportToApi(
+          report.id,
+          index,
+          result.tanggal.toUpperCase(),
+          'Final Assy',
+          result,
+        );
       }
       return;
     }
@@ -470,7 +485,11 @@ class _DashboardPageState extends State<DashboardPage> {
         print('🔵 Updating report: $reportId');
         final response = await http.put(
           Uri.parse('$_baseUrl/reports/$reportId'),
-          headers: {'Content-Type': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+            'Bypass-Tunnel-Reminder': 'true',
+          },
           body: jsonEncode({
             'nama_user': widget.userName,
             'tanggal': tanggal,
@@ -480,12 +499,22 @@ class _DashboardPageState extends State<DashboardPage> {
             'jenis_defect': result.jenisDefect,
             'sub_defect': result.subDefect,
             'jumlah': result.jumlah,
-            'end_number': result is FinalAssyReportResult ? result.endNumber : null,
-            'specification': result is FinalAssyReportResult ? result.specification : null,
+            'end_number': result is FinalAssyReportResult
+                ? result.endNumber
+                : null,
+            'specification': result is FinalAssyReportResult
+                ? result.specification
+                : null,
             'actual': result is FinalAssyReportResult ? result.actual : null,
-            'area_ditemukan': result is FinalAssyReportResult ? result.areaDitemukan : null,
-            'job_station': result is FinalAssyReportResult ? result.jobStation : null,
-            'no_terminal': result is DefectReportResult ? result.noTerminal : null,
+            'area_ditemukan': result is FinalAssyReportResult
+                ? result.areaDitemukan
+                : null,
+            'job_station': result is FinalAssyReportResult
+                ? result.jobStation
+                : null,
+            'no_terminal': result is DefectReportResult
+                ? result.noTerminal
+                : null,
             'no_mesin': result is DefectReportResult ? result.noMesin : null,
           }),
         );
@@ -499,21 +528,26 @@ class _DashboardPageState extends State<DashboardPage> {
                 backgroundColor: yazakiRed,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             );
           }
         } else if (response.statusCode == 403) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Anda tidak memiliki izin mengubah laporan ini.')),
+              const SnackBar(
+                content: Text('Anda tidak memiliki izin mengubah laporan ini.'),
+              ),
             );
           }
         } else {
           print('🔴 Server update failed: ${response.body}');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Gagal memperbarui laporan di server.')),
+              const SnackBar(
+                content: Text('Gagal memperbarui laporan di server.'),
+              ),
             );
           }
         }
@@ -636,7 +670,11 @@ class _DashboardPageState extends State<DashboardPage> {
       print('🔵 Posting report to $_baseUrl/reports');
       final response = await http.post(
         Uri.parse('$_baseUrl/reports'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+          'Bypass-Tunnel-Reminder': 'true',
+        },
         body: jsonEncode({
           'nama_user': widget.userName,
           'shift': widget.shift,
@@ -668,7 +706,8 @@ class _DashboardPageState extends State<DashboardPage> {
               backgroundColor: yazakiRed,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           );
         }
@@ -677,9 +716,9 @@ class _DashboardPageState extends State<DashboardPage> {
         final errBody = jsonDecode(response.body);
         final msg = errBody['message'] ?? 'Gagal mengirim laporan.';
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(msg)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
         }
       }
     } catch (e) {
@@ -713,7 +752,9 @@ class _DashboardPageState extends State<DashboardPage> {
               // ── App Bar ──
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -730,10 +771,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                         const Text(
                           'Server: 192.168.1.25:8000',
-                          style: TextStyle(
-                            fontSize: 9,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 9, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -762,12 +800,13 @@ class _DashboardPageState extends State<DashboardPage> {
                       // ── Badge Shift ──
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFF0F0),
                           borderRadius: BorderRadius.circular(6),
-                          border:
-                              Border.all(color: const Color(0xFFFFCCCC)),
+                          border: Border.all(color: const Color(0xFFFFCCCC)),
                         ),
                         child: Text(
                           'Shift ${widget.shift} aktif',
@@ -829,8 +868,11 @@ class _DashboardPageState extends State<DashboardPage> {
                             padding: const EdgeInsets.symmetric(vertical: 40),
                             child: Column(
                               children: [
-                                const Icon(Icons.inbox_outlined,
-                                    size: 48, color: Colors.grey),
+                                const Icon(
+                                  Icons.inbox_outlined,
+                                  size: 48,
+                                  color: Colors.grey,
+                                ),
                                 const SizedBox(height: 8),
                                 const Text(
                                   'Belum ada riwayat report.',
@@ -895,8 +937,7 @@ class _InputReportButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
         decoration: BoxDecoration(
           color: yazakiRed,
           borderRadius: BorderRadius.circular(6),
@@ -977,8 +1018,11 @@ class _ReportCard extends StatelessWidget {
                       onTap: onEdit,
                       child: const Padding(
                         padding: EdgeInsets.all(6),
-                        child: Icon(Icons.edit_outlined,
-                            size: 18, color: Colors.black54),
+                        child: Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: Colors.black54,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 4),
@@ -990,8 +1034,11 @@ class _ReportCard extends StatelessWidget {
                           color: yazakiRed,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Icon(Icons.delete_outline,
-                            size: 18, color: Colors.white),
+                        child: const Icon(
+                          Icons.delete_outline,
+                          size: 18,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -1141,9 +1188,11 @@ class _ReportCard extends StatelessWidget {
 
           // ── Additional Fields (END, Specification, Actual, Area, Job, Terminal, Mesin) ──
           if ((report.endNumber != null && report.endNumber!.isNotEmpty) ||
-              (report.specification != null && report.specification!.isNotEmpty) ||
+              (report.specification != null &&
+                  report.specification!.isNotEmpty) ||
               (report.actual != null && report.actual!.isNotEmpty) ||
-              (report.areaDitemukan != null && report.areaDitemukan!.isNotEmpty) ||
+              (report.areaDitemukan != null &&
+                  report.areaDitemukan!.isNotEmpty) ||
               (report.jobStation != null && report.jobStation!.isNotEmpty) ||
               (report.noTerminal != null && report.noTerminal!.isNotEmpty) ||
               (report.noMesin != null && report.noMesin!.isNotEmpty)) ...[
@@ -1153,11 +1202,13 @@ class _ReportCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (report.endNumber != null && report.endNumber!.isNotEmpty) ...[
+                  if (report.endNumber != null &&
+                      report.endNumber!.isNotEmpty) ...[
                     _buildRowDetail('END (#)', report.endNumber!),
                     const SizedBox(height: 6),
                   ],
-                  if (report.specification != null && report.specification!.isNotEmpty) ...[
+                  if (report.specification != null &&
+                      report.specification!.isNotEmpty) ...[
                     _buildRowDetail('Specification', report.specification!),
                     const SizedBox(height: 6),
                   ],
@@ -1165,15 +1216,18 @@ class _ReportCard extends StatelessWidget {
                     _buildRowDetail('Actual', report.actual!),
                     const SizedBox(height: 6),
                   ],
-                  if (report.areaDitemukan != null && report.areaDitemukan!.isNotEmpty) ...[
+                  if (report.areaDitemukan != null &&
+                      report.areaDitemukan!.isNotEmpty) ...[
                     _buildRowDetail('Area Ditemukan', report.areaDitemukan!),
                     const SizedBox(height: 6),
                   ],
-                  if (report.jobStation != null && report.jobStation!.isNotEmpty) ...[
+                  if (report.jobStation != null &&
+                      report.jobStation!.isNotEmpty) ...[
                     _buildRowDetail('Job Station', report.jobStation!),
                     const SizedBox(height: 6),
                   ],
-                  if (report.noTerminal != null && report.noTerminal!.isNotEmpty) ...[
+                  if (report.noTerminal != null &&
+                      report.noTerminal!.isNotEmpty) ...[
                     _buildRowDetail('No Terminal', report.noTerminal!),
                     const SizedBox(height: 6),
                   ],
@@ -1197,14 +1251,22 @@ class _ReportCard extends StatelessWidget {
           width: 100,
           child: Text(
             label,
-            style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 12, color: Colors.black87, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.black87,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
