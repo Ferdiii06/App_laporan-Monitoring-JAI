@@ -72,7 +72,7 @@ class _DashboardPageState extends State<DashboardPage> {
   late List<ReportItem> _reports = [];
   bool _isLoading = false;
   static const String _baseUrl =
-      'https://untie-mumble-sasquatch.ngrok-free.dev/api';
+      'http://10.216.0.188:8000/api';
 
   @override
   void initState() {

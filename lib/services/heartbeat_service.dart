@@ -4,7 +4,7 @@ import 'dart:convert';
 
 class HeartbeatService {
   static Timer? _timer;
-  static const String _baseUrl = 'https://untie-mumble-sasquatch.ngrok-free.dev/api';
+  static const String _baseUrl = 'http://10.216.0.188:8000/api';
 
   static Future<void> sendHeartbeat(String nama) async {
     try {
