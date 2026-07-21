@@ -769,10 +769,6 @@ class _DashboardPageState extends State<DashboardPage> {
                             color: yazakiRed,
                           ),
                         ),
-                        const Text(
-                          'Server: 192.168.1.25:8000',
-                          style: TextStyle(fontSize: 9, color: Colors.grey),
-                        ),
                       ],
                     ),
                     GestureDetector(

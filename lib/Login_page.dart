@@ -333,10 +333,6 @@ class _LoginPageState extends State<LoginPage> {
 
                   SizedBox(height: vGapSm),
                   Center(
-                    child: Text(
-                      'Server Target: 192.168.1.25:8000',
-                      style: TextStyle(fontSize: 10, color: Colors.grey),
-                    ),
                   ),
                   SizedBox(height: vGapSm),
                 ],
