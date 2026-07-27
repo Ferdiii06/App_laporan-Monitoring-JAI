@@ -13,18 +13,17 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _pinController = TextEditingController();
+  final TextEditingController _pinController  = TextEditingController();
   String _selectedShift = '1A';
-  bool _isLoading = false; // ← tambahan untuk loading state
+  bool _isLoading    = false; // ← tambahan untuk loading state
 
-  static const Color yazakiRed = Color(0xFFB71C1C);
+  static const Color yazakiRed  = Color(0xFFB71C1C);
   static const Color borderColor = Color(0xFFCCCCCC);
-  static const Color labelRed = Color(0xFFCC0000);
+  static const Color labelRed   = Color(0xFFCC0000);
 
   // ⚠️ Ganti dengan IP laptop jaringan apapun biar bisa diakses sesama IP (cek via ipconfig di Windows)
   // Contoh: 'http://192.168.1.10:8000/api'
-  static const String _baseUrl =
-      'http://10.216.0.188:8000/api';
+  static const String _baseUrl = 'https://192.168.230.28:8001/api';
 
   @override
   void dispose() {
@@ -43,63 +42,62 @@ class _LoginPageState extends State<LoginPage> {
 
     // Validasi
     if (name.isEmpty) {
-      _showError('Nama Lengkap tidak boleh kosong.');
-      return;
+        _showError('Nama Lengkap tidak boleh kosong.');
+        return;
     }
     if (pin.length < 6) {
-      _showError('PIN harus 6 digit');
-      return;
+        _showError('PIN harus 6 digit');
+        return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      final requestBody = {
-        'nama': name,
-        'pin': pin,
-        'shift': shift, // ← KIRIM SHIFT
-      };
+        final requestBody = {
+            'nama': name,
+            'pin': pin,
+            'shift': shift, // ← KIRIM SHIFT
+        };
 
-      print('🔵 Sending to: $_baseUrl/login');
-      print('🔵 Body: $requestBody');
+        print('🔵 Sending to: $_baseUrl/login');
+        print('🔵 Body: $requestBody');
 
-      final response = await http.post(
-        Uri.parse('$_baseUrl/login'),
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
-          'Bypass-Tunnel-Reminder': 'true',
-        },
-        body: jsonEncode(requestBody),
-      );
-
-      final body = jsonDecode(response.body);
-      print('🟢 Response: $body');
-
-      if (response.statusCode == 200 && body['status'] == true) {
-        final data = body['data'];
-        final nama = data['nama'] as String;
-        final shiftData = data['shift'] as String;
-
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => DashboardPage(userName: nama, shift: shiftData),
-          ),
+        final response = await http.post(
+            Uri.parse('$_baseUrl/login'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(requestBody),
         );
-      } else {
-        // Tampilkan pesan error dari server
-        final message = body['message'] ?? 'Login gagal.';
-        _showError(message);
-      }
+
+        final body = jsonDecode(response.body);
+        print('🟢 Response: $body');
+
+        if (response.statusCode == 200 && body['status'] == true) {
+            final data = body['data'];
+            final nama = data['nama'] as String;
+            final shiftData = data['shift'] as String;
+
+            if (!mounted) return;
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => DashboardPage(
+                        userName: nama,
+                        shift: shiftData,
+                    ),
+                ),
+            );
+        } else {
+            // Tampilkan pesan error dari server
+            final message = body['message'] ?? 'Login gagal.';
+            _showError(message);
+        }
     } catch (e) {
-      print('🔴 Error: $e');
-      _showError('Tidak dapat terhubung ke server.');
+        print('🔴 Error: $e');
+        _showError('Tidak dapat terhubung ke server.');
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+        if (mounted) setState(() => _isLoading = false);
     }
-  }
+}
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -126,14 +124,14 @@ class _LoginPageState extends State<LoginPage> {
           builder: (context, constraints) {
             final screenH = constraints.maxHeight;
             // Ukuran adaptif berdasarkan tinggi layar
-            final logoH = screenH * 0.38; // 38% tinggi layar
-            final vPadTop = screenH * 0.02;
-            final vGapLg = screenH * 0.015;
-            final vGapSm = screenH * 0.010;
-            final fieldH = screenH * 0.068;
-            final btnH = screenH * 0.068;
-            final shiftH = screenH * 0.065;
-            final fontSize = screenH < 600 ? 11.0 : 13.0;
+            final logoH     = screenH * 0.38;   // 38% tinggi layar
+            final vPadTop   = screenH * 0.02;
+            final vGapLg    = screenH * 0.015;
+            final vGapSm    = screenH * 0.010;
+            final fieldH    = screenH * 0.068;
+            final btnH      = screenH * 0.068;
+            final shiftH    = screenH * 0.065;
+            final fontSize  = screenH < 600 ? 11.0 : 13.0;
 
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: vPadTop),
@@ -180,30 +178,11 @@ class _LoginPageState extends State<LoginPage> {
                           fontSize: fontSize - 1,
                           color: Colors.grey,
                         ),
-                        prefixIcon: const Icon(
-                          Icons.person_outline,
-                          color: Colors.grey,
-                          size: 18,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 0,
-                          horizontal: 12,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: const BorderSide(color: borderColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: const BorderSide(color: borderColor),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: const BorderSide(
-                            color: yazakiRed,
-                            width: 1.5,
-                          ),
-                        ),
+                        prefixIcon: const Icon(Icons.person_outline, color: Colors.grey, size: 18),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: borderColor)),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: borderColor)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: yazakiRed, width: 1.5)),
                       ),
                     ),
                   ),
@@ -261,30 +240,11 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: InputDecoration(
                         hintText: '••••••',
                         counterText: '',
-                        prefixIcon: const Icon(
-                          Icons.lock_outline,
-                          color: Colors.grey,
-                          size: 18,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 0,
-                          horizontal: 12,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: const BorderSide(color: borderColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: const BorderSide(color: borderColor),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: const BorderSide(
-                            color: yazakiRed,
-                            width: 1.5,
-                          ),
-                        ),
+                        prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey, size: 18),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: borderColor)),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: borderColor)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: yazakiRed, width: 1.5)),
                       ),
                     ),
                   ),
@@ -301,16 +261,9 @@ class _LoginPageState extends State<LoginPage> {
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                             )
-                          : const Icon(
-                              Icons.arrow_forward,
-                              color: Colors.white,
-                              size: 18,
-                            ),
+                          : const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
                       label: Text(
                         _isLoading ? 'Memproses...' : 'Masuk ke Sistem',
                         style: TextStyle(
@@ -323,16 +276,14 @@ class _LoginPageState extends State<LoginPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: yazakiRed,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                         elevation: 0,
                       ),
                     ),
                   ),
 
                   SizedBox(height: vGapSm),
-                  Center( 
+                  Center(
                   ),
                   SizedBox(height: vGapSm),
                 ],
@@ -375,13 +326,14 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+
 // ─────────────────────────────────────────
 // PAINTER: Logo Segitiga Yazaki — tidak berubah
 // ─────────────────────────────────────────
 class _YazakiLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paintRed = Paint()..color = const Color(0xFFCC0000);
+    final paintRed  = Paint()..color = const Color(0xFFCC0000);
     final paintDark = Paint()..color = const Color(0xFF8B0000);
 
     final pathMain = Path()
