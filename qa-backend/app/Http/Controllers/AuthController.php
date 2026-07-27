@@ -42,17 +42,11 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Cek shift
-        Log::info('Shift check:', [
-            'input_shift' => $request->shift,
-            'user_shift' => $user->shift
+        // Cek shift — dihapus: user & admin boleh akses semua shift
+        Log::info('Shift login (bebas):', [
+            'nama' => $user->nama,
+            'shift_dipilih' => $request->shift,
         ]);
-        if ($request->shift !== $user->shift) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Shift yang dipilih tidak sesuai. Anda terdaftar sebagai Shift ' . $user->shift . '.'
-            ], 403);
-        }
 
         // Simpan waktu login dan keaktifan terakhir
         $user->last_login_at = now();
@@ -61,13 +55,13 @@ class AuthController extends Controller
 
         event(new UserStatusUpdated());
 
-        // Login berhasil
+        // Login berhasil — kembalikan shift yang dipilih user (bukan shift di DB)
         return response()->json([
             'status' => true,
             'message' => 'Login berhasil',
             'data' => [
                 'nama' => $user->nama,
-                'shift' => $user->shift,
+                'shift' => $request->shift,
             ]
         ]);
     }

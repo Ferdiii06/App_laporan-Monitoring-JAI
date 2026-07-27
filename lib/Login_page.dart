@@ -332,7 +332,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
 
                   SizedBox(height: vGapSm),
-                  Center(
+                  Center( 
                   ),
                   SizedBox(height: vGapSm),
                 ],

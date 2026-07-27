@@ -25,6 +25,7 @@ class User extends Authenticatable
         'nama',
         'pin',
         'shift',
+        'role',
         'last_login_at',
         'last_active_at',
     ];
@@ -37,7 +38,6 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'pin',
     ];
 
     /**
