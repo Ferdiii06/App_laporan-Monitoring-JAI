@@ -75,7 +75,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   late List<ReportItem> _reports = [];
   bool _isLoading = false;
-  static const String _baseUrl = 'https://192.168.230.28:8001/api';
+  static const String _baseUrl = 'https://192.168.1.49:8001/api';
 
   @override
   void initState() {
@@ -673,7 +673,7 @@ class _DashboardPageState extends State<DashboardPage> {
           );
         }
       } else {
-        print('🔴 Server post failed: ${response.body}');
+        print('🔴 Server post failed: ${response.body}'); 
         final errBody = jsonDecode(response.body);
         final msg = errBody['message'] ?? 'Gagal mengirim laporan.';
         if (mounted) {
