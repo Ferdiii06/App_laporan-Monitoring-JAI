@@ -69,6 +69,8 @@ class AuthController extends Controller
     // 🆕 METHOD BARU UNTUK HEARTBEAT (Active Users)
     public function heartbeat(Request $request)
     {
+        Log::info('=== HEARTBEAT MASUK ===', ['data' => $request->all()]);
+
         $request->validate([
             'nama' => 'required|string',
         ]);
@@ -102,7 +104,7 @@ class AuthController extends Controller
             'nama' => 'required|string',
         ]);
 
-        $user = User::where('nama', $request->nama)->first();
+        $user = User::where('name', $request->nama)->first();
 
         if (!$user) {
             Log::warning('Logout - user not found:', ['nama' => $request->nama]);

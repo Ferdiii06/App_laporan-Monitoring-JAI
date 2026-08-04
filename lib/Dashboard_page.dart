@@ -75,7 +75,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   late List<ReportItem> _reports = [];
   bool _isLoading = false;
-  static const String _baseUrl = 'https://192.168.230.28:8001/api';
+  static const String _baseUrl = 'http://192.168.230.28:8001/api';
 
   @override
   void initState() {
