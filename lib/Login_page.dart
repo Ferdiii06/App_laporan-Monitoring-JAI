@@ -23,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
 
   // ⚠️ Ganti dengan IP laptop jaringan apapun biar bisa diakses sesama IP (cek via ipconfig di Windows)
   // Contoh: 'http://192.168.1.10:8000/api'
-  static const String _baseUrl = 'https://192.168.1.49:8001/api';
+  static const String _baseUrl = 'https://192.168.230.28:8001/api';
 
   @override
   void dispose() {
