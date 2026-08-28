@@ -55,8 +55,11 @@ class AuthController extends Controller
         $user->last_login_at = now();
         $user->last_active_at = now();
         $user->save();
-
-        event(new UserStatusUpdated());
+        try {
+            event(new UserStatusUpdated());
+        } catch (\Exception $e) {
+            Log::error('Broadcast failed in login: ' . $e->getMessage());
+        }
 
         // Login berhasil — kembalikan shift yang dipilih user (bukan shift di DB)
         return response()->json([
@@ -90,8 +93,11 @@ class AuthController extends Controller
 
         $user->last_active_at = now();
         $user->save();
-
-        event(new UserStatusUpdated());
+        try {
+            event(new UserStatusUpdated());
+        } catch (\Exception $e) {
+            Log::error('Broadcast failed in heartbeat: ' . $e->getMessage());
+        }
 
         return response()->json([
             'status' => true,
@@ -120,8 +126,11 @@ class AuthController extends Controller
         // Reset last_active_at saat logout
         $user->last_active_at = null;
         $user->save();
-
-        event(new UserStatusUpdated());
+        try {
+            event(new UserStatusUpdated());
+        } catch (\Exception $e) {
+            Log::error('Broadcast failed in logout: ' . $e->getMessage());
+        }
 
         return response()->json([
             'status' => true,
