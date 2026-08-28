@@ -58,7 +58,7 @@
             
             // Fungsi untuk mengirim heartbeat
             function sendHeartbeat() {
-                fetch('/api/heartbeat', {
+                fetch('{{ url("api/heartbeat") }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
